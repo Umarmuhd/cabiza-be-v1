@@ -34,7 +34,7 @@ export async function signupUserHandler(
 
     const wallet = await WalletModel.create({ user: user._id });
 
-    const activationLink = `http://com.escrow.com/${user._id}?token=${user.activation_code.token}`;
+    const activationLink = `https://cabiza-fe-v1.vercel.app/auth/verify-email?token=${user.activation_code.token}&id=${user._id}`;
 
     await Mailer.send("confirm-account", user, {
       activationLink,
