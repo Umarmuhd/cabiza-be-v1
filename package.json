@@ -1,0 +1,57 @@
+{
+  "name": "auth-api-tutorial",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Tom Nagle",
+  "license": "MIT",
+  "scripts": {
+<<<<<<< HEAD
+    "build": "tsc",
+    "start": "node build/src/app.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
+=======
+    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
+    "gen": "plop"
+>>>>>>> 7024337023beb430a1b571d92567fade3ccd3104
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^5.0.0",
+    "@types/config": "0.0.40",
+    "@types/cors": "^2.8.12",
+    "@types/date-fns": "^2.6.0",
+    "@types/express": "^4.17.13",
+    "@types/jsonwebtoken": "^8.5.6",
+    "@types/lodash": "^4.14.178",
+    "@types/multer": "^1.4.7",
+    "@types/mustache": "^4.1.2",
+    "@types/nodemailer": "^6.4.4",
+    "@types/nodemailer-mailgun-transport": "^1.4.3",
+    "@types/uuid": "^8.3.4",
+    "pino-pretty": "^7.3.0",
+    "plop": "^3.0.5",
+    "ts-node-dev": "^1.1.8",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "@typegoose/typegoose": "^9.3.1",
+    "argon2": "^0.28.3",
+    "bcrypt": "^5.0.1",
+    "config": "^3.3.7",
+    "cors": "^2.8.5",
+    "date-fns": "^2.28.0",
+    "dayjs": "^1.10.7",
+    "dotenv": "^10.0.0",
+    "express": "^5.0.0-alpha.8",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.1.4",
+    "multer": "^1.4.4",
+    "mustache": "^4.2.0",
+    "nanoid": "^3.1.30",
+    "nodemailer": "^6.7.2",
+    "nodemailer-mailgun-transport": "^2.1.3",
+    "pino": "^7.6.1",
+    "uuid": "^8.3.2",
+    "zod": "^3.11.6"
+  }
+}

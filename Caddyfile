@@ -1,0 +1,5 @@
+cabiza.duckdns.org {
+    reverse_proxy cabiza_core:3500 {
+        header_down Strict-Transport-Security max-age=31536000;
+    }
+}
