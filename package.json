@@ -5,14 +5,9 @@
   "author": "Tom Nagle",
   "license": "MIT",
   "scripts": {
-<<<<<<< HEAD
     "build": "tsc",
     "start": "node build/src/app.js",
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
-=======
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "gen": "plop"
->>>>>>> 7024337023beb430a1b571d92567fade3ccd3104
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.0",
