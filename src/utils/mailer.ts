@@ -23,7 +23,7 @@ class Mailer {
 
     this.transport.sendMail({
       to: user.email,
-      from: "Escrow Africa mail@escroww.africa",
+      from: "Cabiza no-reply@cabiza.com",
       subject: data?.subject as string,
       html: content,
     });
