@@ -1,6 +1,7 @@
 export default {
   port: 3500,
-  dbUri: "mongodb://localhost:27017/cabiza_core",
+  dbUri:
+    "mongodb+srv://cabiza:cabiza.com@cluster0.iqedk.mongodb.net/cabiza_core?retryWrites=true&w=majority",
   logLevel: "info",
   accessTokenPrivateKey: "",
   refreshTokenPrivateKey: "",
