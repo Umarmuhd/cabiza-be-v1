@@ -21,7 +21,7 @@ export async function createPaymentLink(order: any) {
         tx_ref: order.order_id,
         amount: order.final_price,
         currency: "NGN",
-        redirect_url: "https://cabiza-fe-v1.vercel.app/verifying",
+        redirect_url: "https://cabiza-fe-v1.vercel.app/checkout/verifying",
         payment_options: "card",
         meta: {},
         customer: {
