@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { nanoid } from "nanoid";
 import { addMinutes, isAfter } from "date-fns";
 import UserModel from "../model/user.model";
+import WalletModel from "../model/wallet.model";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
 import { findUserById } from "../service/user.service";
 import log from "../utils/logger";
@@ -109,6 +110,29 @@ export async function connectStripeHandler(req: Request, res: Response) {
       data: {
         url: `${account_link.url}?${queryString.stringify(account_link)}`,
       },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function getUserBalanceHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  try {
+    const wallet = await WalletModel.findOne({ user: user_id });
+
+    if (!wallet) {
+      return res
+        .status(500)
+        .json({ success: false, message: "something went wrong" });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "wallet",
+      data: { wallet },
     });
   } catch (error: any) {
     log.error(error);

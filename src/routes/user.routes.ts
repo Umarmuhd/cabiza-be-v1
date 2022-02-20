@@ -8,6 +8,7 @@ import // forgotPasswordHandler,
 import {
   connectStripeHandler,
   findUserByUsername,
+  getUserBalanceHandler,
   onBoardingHandler,
 } from "../controller/user.controller";
 import requireUser from "../middleware/requireUser";
@@ -21,11 +22,7 @@ import {
 
 const router = express.Router();
 
-// router.post(
-//   "/api/users/verify/:id/:verificationCode",
-//   validateResource(verifyUserSchema),
-//   verifyUserHandler
-// );
+router.get("/balance/me", requireUser, getUserBalanceHandler);
 
 router.post("/onboarding", requireUser, onBoardingHandler);
 
