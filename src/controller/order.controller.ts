@@ -101,7 +101,7 @@ export async function orderCompleteHandler(req: Request, res: Response) {
       //@ts-ignore
       amount: order?.product.price,
       //@ts-ignore
-      user: order?.product.use,
+      user: order?.product.user,
     });
 
     if (!credit.success) {
