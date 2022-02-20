@@ -2,12 +2,12 @@ import WalletModel from "../model/wallet.model";
 
 export async function creditEarningsBalance({
   amount,
-  user_id,
+  user,
 }: {
   amount: number;
-  user_id: any;
+  user: any;
 }) {
-  const wallet = await WalletModel.findOne({ user: user_id });
+  const wallet = await WalletModel.findOne({ user });
 
   if (!wallet) {
     return { success: false, message: "wallet not found" };

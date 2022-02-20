@@ -100,7 +100,7 @@ export async function orderCompleteHandler(req: Request, res: Response) {
     const credit = await creditEarningsBalance({
       //@ts-ignore
       amount: order.product.price,
-      user_id: order?.user,
+      user: order?.user,
     });
 
     if (!credit.success) {
