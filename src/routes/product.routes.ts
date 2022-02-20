@@ -1,17 +1,21 @@
 import express from "express";
-// import {
-//   createNewPostHandler,
-//   deletePostsHandler,
-//   getUserPostsHandler,
-// } from "../controller/post.controller";
+import {
+  createNewProductHandler,
+  getAllProductsHandler,
+  getSingleProductHandle,
+  getUserProductsHandler,
+} from "../controller/product.controller";
+
 import requireUser from "../middleware/requireUser";
 
 const router = express.Router();
 
-// router.post("/new", requireUser, createNewPostHandler);
+router.post("/new", requireUser, createNewProductHandler);
 
-// router.get("/post/:user_id", getUserPostsHandler);
+router.get("/user/:user_id", getUserProductsHandler);
 
-// router.get("/post/:post_id", requireUser, deletePostsHandler);
+router.get("/all", getAllProductsHandler);
+
+router.get("/product/:product_id", getSingleProductHandle);
 
 export default router;

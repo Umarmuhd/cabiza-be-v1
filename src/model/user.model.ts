@@ -10,7 +10,6 @@ import {
 } from "@typegoose/typegoose";
 import bcrypt from "bcrypt";
 import log from "../utils/logger";
-// import { Account } from "./accounts.model";
 
 export const privateFields = [
   "password",
@@ -45,9 +44,6 @@ export const privateFields = [
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
   email: string;
-
-  // @prop({ ref: () => Account })
-  // accounts: [Ref<Account>];
 
   @prop({ required: true })
   full_name: string;
@@ -96,6 +92,18 @@ export class User {
 
   @prop({ default: false })
   verified: boolean;
+
+  @prop()
+  stripe: {
+    account_id: string | null;
+    seller: string | null;
+    session: string | null;
+  };
+
+  @prop()
+  flutterwave: {
+    account_id: string | null;
+  };
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

@@ -30,6 +30,9 @@ export async function signupUserHandler(
         token: nanoid(),
         expires_at: addMinutes(new Date(), 15),
       },
+      stripe: {
+        account_id: null,
+      },
     });
 
     const wallet = await WalletModel.create({ user: user._id });

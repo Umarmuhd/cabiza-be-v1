@@ -6,6 +6,8 @@ import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
 import { findUserById } from "../service/user.service";
 import log from "../utils/logger";
 import { signAccessToken, signRefreshToken } from "../service/auth.service";
+import Stripe from "stripe";
+import queryString from "query-string";
 const Mailer = require("../utils/mailer");
 
 export async function getCurrentUserHandler(req: Request, res: Response) {
@@ -61,5 +63,55 @@ export async function findUserByUsername(req: Request, res: Response) {
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function connectStripeHandler(req: Request, res: Response) {
+  try {
+    const user_id = res.locals.user._id;
+
+    const user = await UserModel.findById(user_id).exec();
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found" });
+    }
+
+    const stripe = new Stripe(
+      "sk_test_51HrwuMAaXQxa9dQPWMwKxsVqba0KoONYHauT6lrf7FPknzjBEklwQKUnnor1edH8AA3X7nbL257SZwkwbh7x3Bwa00auecfjQQ",
+      {
+        apiVersion: "2020-08-27",
+      }
+    );
+
+    if (!user?.stripe?.account_id) {
+      const account = await stripe.accounts.create({ type: "express" });
+      console.log("ACCOUNT => ", account.id);
+      user.stripe.account_id = account.id;
+      await user.save();
+    }
+
+    let account_link = await stripe.accountLinks.create({
+      account: user?.stripe?.account_id,
+      refresh_url: process.env.STRIPE_REDIRECT_URL || "localhost",
+      return_url: process.env.STRIPE_REDIRECT_URL || "localhost",
+      type: "account_onboarding",
+    });
+
+    account_link = Object.assign(account_link, {
+      "stripe_user[email]": user.email,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "stripe on boarding",
+      data: {
+        url: `${account_link.url}?${queryString.stringify(account_link)}`,
+      },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 }

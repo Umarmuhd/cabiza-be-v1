@@ -16,4 +16,8 @@ export default {
     domain: "escroww.africa",
     api_key: "f8a6a2a4ee40043ccd4c0c928982632b-7005f37e-382e96f0",
   },
+  flutterwave: {
+    baseUrl: "https://api.flutterwave.com/v3",
+    secKey: "FLWSECK_TEST-54001f0b9852122a6b47e59a8f8fb06b-X",
+  },
 };

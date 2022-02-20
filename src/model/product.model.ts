@@ -5,19 +5,15 @@ import { User } from "./user.model";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 
-enum AudienceEnum {
-  "Everyone",
-  "Followers only",
-  "Customers only",
-  "Affiliates only",
+enum CategoriesEnum {
+  "Classic",
+  "Pre Order",
+  "Membership",
 }
-enum ChannelEnum {
-  "Send Email",
-  "Post to profile",
-}
-enum EngagementEnum {
-  "Allow comments",
-  "Allow Likes",
+enum CurrencyEnum {
+  "Naira - ₦",
+  "Dollars - $",
+  "Euro - €",
 }
 
 export class Product {
@@ -27,32 +23,32 @@ export class Product {
   @prop({ ref: () => User })
   user: Ref<User>;
 
-  @prop({ required: true })
-  title: string;
+  @prop({})
+  image: string;
+
+  @prop({})
+  description: string;
 
   @prop({ required: true })
-  description: string;
+  name: string;
+
+  @prop({ required: true, default: 0 })
+  price: number;
+
+  @prop({ default: 0 })
+  total_purchase: number;
 
   @prop()
   call_to_action: string;
 
   @prop()
-  attachment: string;
+  contains_physical: boolean;
 
-  @prop({ enum: AudienceEnum, default: 0 })
-  audience: AudienceEnum;
+  @prop({ enum: CategoriesEnum, default: 0 })
+  categories: CategoriesEnum;
 
-  @prop({ enum: ChannelEnum, default: 1 })
-  channel: ChannelEnum;
-
-  @prop({ enum: EngagementEnum, default: 0 })
-  engagement: EngagementEnum;
-
-  @prop({ ref: () => User })
-  likes?: Ref<User>[];
-
-  @prop({})
-  scheduled: Date;
+  @prop({ enum: CurrencyEnum, default: 1 })
+  currency: CurrencyEnum;
 }
 
 const ProductModel = getModelForClass(Product, {

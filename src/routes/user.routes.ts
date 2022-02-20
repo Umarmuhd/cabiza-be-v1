@@ -6,6 +6,7 @@ import // forgotPasswordHandler,
 // verifyUserHandler,
 "../controller/user.controller";
 import {
+  connectStripeHandler,
   findUserByUsername,
   onBoardingHandler,
 } from "../controller/user.controller";
@@ -29,6 +30,8 @@ const router = express.Router();
 router.post("/onboarding", requireUser, onBoardingHandler);
 
 router.get("/username/:username", findUserByUsername);
+
+router.get("/connect/stripe", requireUser, connectStripeHandler);
 
 // router.post(
 //   "/api/users/forgotpassword",

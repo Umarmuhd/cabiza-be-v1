@@ -15,11 +15,8 @@ export class Wallet {
   @prop({ required: true, default: 0 })
   balance: number;
 
-  //   @prop({ default: 0 })
-  //   pending_balance: number;
-
-  //   @prop({ default: 0 })
-  //   dispute_balance: number;
+  @prop({ default: 0 })
+  earnings: number;
 }
 
 const WalletModel = getModelForClass(Wallet, {
