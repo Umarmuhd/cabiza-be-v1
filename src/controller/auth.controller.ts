@@ -35,7 +35,7 @@ export async function signupUserHandler(
       },
     });
 
-    const wallet = await WalletModel.create({ user: user._id });
+    await WalletModel.create({ user: user._id });
 
     const activationLink = `https://cabiza-fe-v1.vercel.app/auth/verify-email?token=${user.activation_code.token}&id=${user._id}`;
 

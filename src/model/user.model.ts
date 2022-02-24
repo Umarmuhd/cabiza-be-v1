@@ -54,7 +54,7 @@ export class User {
   @prop({})
   last_name: string;
 
-  @prop({ unique: true })
+  @prop({})
   username: string;
 
   @prop({})
