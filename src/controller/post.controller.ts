@@ -9,11 +9,9 @@ export async function createNewPostHandler(req: Request, res: Response) {
   try {
     const post = await createPost({ ...req.body, user: user_id });
 
-    return res.status(201).json({
-      success: true,
-      message: "post created successful",
-      data: { post },
-    });
+    return res
+      .status(201)
+      .json({ success: true, message: "post created", data: { post } });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
@@ -123,9 +121,7 @@ export async function publishingHandler(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      message: `post ${
-        post.published ? "published" : "unpublished"
-      } successful`,
+      message: `post ${post.published ? "published" : "unpublished"}`,
       data: { post },
     });
   } catch (error: any) {

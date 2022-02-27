@@ -8,6 +8,7 @@ import {
 } from "../service/order.service";
 import { creditEarningsBalance } from "../service/wallet.service";
 import log from "../utils/logger";
+const Mailer = require("../utils/mailer");
 
 export async function createNewOrderHandler(req: Request, res: Response) {
   const { name, email, discount_code, price } = req.body;
@@ -112,6 +113,11 @@ export async function orderCompleteHandler(req: Request, res: Response) {
 
     order.order_paid = true;
     await order.save();
+
+    await Mailer.send("order-confirm", order.user, {
+      orderId: order.order_id,
+      subject: "Welcome to Cabiza",
+    });
 
     return res
       .status(200)
