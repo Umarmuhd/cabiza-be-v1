@@ -13,6 +13,7 @@ import { verifyJwt } from "../utils/jwt";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
 import { nanoid } from "nanoid";
 import WalletModel from "../model/wallet.model";
+import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
 export async function signupUserHandler(
@@ -221,4 +222,89 @@ export async function refreshAccessToken(req: Request, res: Response) {
       profile_picture: user.profile_picture,
     },
   });
+}
+
+export async function forgetPasswordHandler(req: Request, res: Response) {
+  try {
+    const email = req.body.email;
+
+    if (!email) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Please provide your email" });
+    }
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Email not found please signup" });
+    }
+
+    const token = nanoid();
+
+    user.password_reset = { token, expires_at: addMinutes(new Date(), 15) };
+
+    await Mailer.send("forgot-password", user, {
+      resetLink: `https://cabiza-fe-v1.vercel.app/auth/reset-password?token=${token}&email=${email}`,
+      subject: "forget your password",
+    });
+
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: `Password reset code has been sent to ${email}`,
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function resetPasswordHandler(req: Request, res: Response) {
+  try {
+    const { token, password, email } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Please provide password reset token",
+      });
+    }
+
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid password reset token" });
+    }
+
+    if (isAfter(new Date(), new Date(user.password_reset.expires_at!))) {
+      return res
+        .status(202)
+        .json({ success: false, message: "Password reset token expired" });
+    }
+
+    if (user.password_reset.token !== token) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid password reset code" });
+    }
+
+    user.password = password;
+    user.password_reset.token = null;
+    user.password_reset.expires_at = null;
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "User password reset successful" });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 }

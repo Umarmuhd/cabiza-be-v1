@@ -85,10 +85,10 @@ export class User {
   };
 
   @prop()
-  password_reset_code: string | null;
-
-  @prop()
-  password_reset_code_expires: Date | null;
+  password_reset: {
+    token: string | null;
+    expires_at: Date | null;
+  };
 
   @prop({ default: false })
   verified: boolean;

@@ -1,9 +1,11 @@
 import express from "express";
 import {
   accountActivation,
+  forgetPasswordHandler,
   loginUserHandler,
   refreshAccessToken,
   refreshAccessTokenHandler,
+  resetPasswordHandler,
   signupUserHandler,
 } from "../controller/auth.controller";
 import validateResource from "../middleware/validateResource";
@@ -21,6 +23,10 @@ router.post(
   validateResource(verifyUserSchema),
   accountActivation
 );
+
+router.post("/forget-password", forgetPasswordHandler);
+
+router.post("/reset-password", resetPasswordHandler);
 
 router.post("/api/sessions/refresh", refreshAccessTokenHandler);
 

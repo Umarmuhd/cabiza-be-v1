@@ -50,7 +50,7 @@ export async function createNewOrderHandler(req: Request, res: Response) {
     });
   } catch (error: any) {
     log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
 
@@ -63,13 +63,13 @@ export async function orderCompleteHandler(req: Request, res: Response) {
     if (transaction.error) {
       return res
         .status(400)
-        .json({ status: "failed", message: "transaction does not exist" });
+        .json({ success: false, message: "transaction does not exist" });
     }
 
     if (transaction.data.data.status !== "successful") {
       return res
         .status(400)
-        .json({ status: "failed", message: "transaction not paid" });
+        .json({ success: false, message: "transaction not paid" });
     }
 
     const order_id = transaction.data.data.tx_ref;
@@ -77,7 +77,7 @@ export async function orderCompleteHandler(req: Request, res: Response) {
     if (tx_ref !== order_id) {
       return res
         .status(400)
-        .json({ status: "failed", message: "incorrect order id" });
+        .json({ success: false, message: "incorrect order id" });
     }
 
     const order = await OrderModel.findOne({ order_id })
@@ -100,7 +100,7 @@ export async function orderCompleteHandler(req: Request, res: Response) {
 
     const credit = await creditEarningsBalance({
       //@ts-ignore
-      amount: order?.product.price,
+      amount: order?.product?.price,
       //@ts-ignore
       user: order?.product.user,
     });
@@ -116,14 +116,14 @@ export async function orderCompleteHandler(req: Request, res: Response) {
 
     await Mailer.send("order-confirm", order.user, {
       orderId: order.order_id,
-      subject: "Welcome to Cabiza",
+      subject: "Order Complete",
     });
 
     return res
       .status(200)
-      .json({ success: true, message: "payment successfully made" });
+      .json({ success: true, message: "Payment successfully made" });
   } catch (error: any) {
     log.error(error);
-    return res.status(409).json({ status: "failed", message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
