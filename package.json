@@ -10,6 +10,7 @@
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts"
   },
   "devDependencies": {
+    "@types/aws-sdk": "^2.7.0",
     "@types/axios": "^0.14.0",
     "@types/bcrypt": "^5.0.0",
     "@types/config": "0.0.40",

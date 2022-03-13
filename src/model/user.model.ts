@@ -41,6 +41,18 @@ export const privateFields = [
     allowMixed: Severity.ALLOW,
   },
 })
+
+class BankAccount {
+  @prop()
+  public account_number: string | null;
+
+  @prop()
+  public account_name: string | null;
+
+  @prop()
+  public bank_code: string | null;
+}
+
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
   email: string;
@@ -104,6 +116,14 @@ export class User {
   flutterwave: {
     account_id: string | null;
   };
+
+  @prop()
+  paypal: {
+    email: string | null;
+  }
+
+  @prop()
+  bank_account?: BankAccount;
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

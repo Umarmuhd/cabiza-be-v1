@@ -6,6 +6,8 @@ import // forgotPasswordHandler,
 // verifyUserHandler,
 "../controller/user.controller";
 import {
+  addBankAccountHandler,
+  addPaypalHandler,
   connectStripeHandler,
   findUserByUsername,
   getUserBalanceHandler,
@@ -29,6 +31,10 @@ router.post("/onboarding", requireUser, onBoardingHandler);
 router.get("/username/:username", findUserByUsername);
 
 router.get("/connect/stripe", requireUser, connectStripeHandler);
+
+router.post("/connect/paypal", requireUser, addPaypalHandler);
+
+router.post("/connect/bank", requireUser, addBankAccountHandler);
 
 // router.post(
 //   "/api/users/forgotpassword",

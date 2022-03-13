@@ -11,7 +11,7 @@ export async function createNewProductHandler(req: Request, res: Response) {
 
     return res.status(201).json({
       success: true,
-      message: "product created successful",
+      message: "Product created successful",
       data: { product },
     });
   } catch (error: any) {

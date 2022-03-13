@@ -139,3 +139,59 @@ export async function getUserBalanceHandler(req: Request, res: Response) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export async function addPaypalHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  try {
+    const user = await UserModel.findById(user_id).exec();
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found" });
+    }
+
+    user.paypal.email = req.body.paypal;
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({
+        success: true,
+        message: "paypal payment method added",
+        data: { email: req.body.paypal },
+      });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function addBankAccountHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const { account_name, account_number, bank_code } = req.body;
+
+  try {
+    const user = await UserModel.findById(user_id).exec();
+
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found" });
+    }
+
+    user.bank_account = { bank_code, account_name, account_number };
+
+    await user.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "bank account saved" });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
