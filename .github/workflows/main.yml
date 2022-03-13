@@ -2,7 +2,7 @@
 name: Build and push cabiza to ecr
 on:
   push:
-    branches: [main]
+    branches: [master]
 jobs:
   build-and-push:
     name: Build and Push to ECR
