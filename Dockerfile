@@ -20,4 +20,6 @@ WORKDIR /src
 
 RUN npm run build
 
+EXPOSE 3500
+
 CMD ["node", "build/src/app.js"]
