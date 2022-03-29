@@ -17,7 +17,7 @@ app.use(cors({ origin: "https://cabiza-fe-v1.vercel.app" }));
 app.use((req, res, next) => {
   res.setHeader(
     "Access-Control-Allow-Origin",
-    "https://cabiza-fe-v1.vercel.app/"
+    "https://cabiza-fe-v1.vercel.app"
   );
   res.setHeader(
     "Access-Control-Allow-Headers",
