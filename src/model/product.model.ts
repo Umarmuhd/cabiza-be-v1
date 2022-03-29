@@ -14,9 +14,9 @@ class Affiliate {
 }
 
 enum CategoriesEnum {
-  "Classic",
-  "Pre Order",
-  "Membership",
+  "Education",
+  "Crafts & DIY",
+  "Health & Fitness",
 }
 enum CurrencyEnum {
   "Naira - ₦",
