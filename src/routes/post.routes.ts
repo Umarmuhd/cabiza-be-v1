@@ -7,12 +7,17 @@ import {
   publishingHandler,
 } from "../controller/post.controller";
 import requireUser from "../middleware/requireUser";
+import fileUpload from "../utils/file-upload";
 
 const router = express.Router();
 
 router.get("/post/:post_id", getSinglePostHandler);
 
-router.post("/new", requireUser, createNewPostHandler);
+router.post(
+  "/new",
+  [requireUser, fileUpload.single("attachment")],
+  createNewPostHandler
+);
 
 router.get("/user/:user_id", getUserPostsHandler);
 

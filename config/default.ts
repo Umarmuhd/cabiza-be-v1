@@ -20,4 +20,9 @@ export default {
     baseUrl: "https://api.flutterwave.com/v3",
     secKey: "FLWSECK_TEST-54001f0b9852122a6b47e59a8f8fb06b-X",
   },
+  braintree: {
+    publicKey: "",
+    privateKey: "",
+    merchantId: "",
+  },
 };

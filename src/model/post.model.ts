@@ -1,4 +1,4 @@
-import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
+import { getModelForClass, mongoose, prop, Ref } from "@typegoose/typegoose";
 import { customAlphabet } from "nanoid";
 
 import { User } from "./user.model";
@@ -11,6 +11,7 @@ enum AudienceEnum {
   "Customers only",
   "Affiliates only",
 }
+
 enum ChannelEnum {
   "Send Email",
   "Post to profile",
@@ -18,6 +19,15 @@ enum ChannelEnum {
 enum EngagementEnum {
   "Allow comments",
   "Allow Likes",
+}
+
+class Channel {
+  @prop({ enum: ChannelEnum, default: 1 })
+  name: ChannelEnum;
+}
+class Engagement {
+  @prop({ enum: EngagementEnum, default: 1 })
+  name: EngagementEnum;
 }
 
 export class Post {
@@ -45,11 +55,17 @@ export class Post {
   @prop({ enum: AudienceEnum, default: 0 })
   audience: AudienceEnum;
 
-  @prop({ enum: ChannelEnum, default: 1 })
-  channel: ChannelEnum;
+  // @prop({ ref: () => Channel })
+  // channel?: Ref<Channel>[];
 
-  @prop({ enum: EngagementEnum, default: 0 })
-  engagement: EngagementEnum;
+  @prop({ type: String, required: true, default: ["1"] })
+  channel: mongoose.Types.Array<string>;
+
+  @prop({ type: String, required: true, default: [] })
+  engagements: mongoose.Types.Array<string>;
+
+  // @prop({ ref: () => Engagement })
+  // engagement?: Ref<Engagement>[];
 
   @prop({ ref: () => User })
   likes?: Ref<User>[];
