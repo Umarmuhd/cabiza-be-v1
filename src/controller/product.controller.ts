@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import ProductModel from "../model/product.model";
 import { createProduct } from "../service/product.service";
 import log from "../utils/logger";
+import braintree from "../utils/braintree";
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -73,3 +74,29 @@ export async function getSingleProductHandle(req: Request, res: Response) {
     return res.status(409).json({ success: false, message: error.message });
   }
 }
+
+// export async function getTokenBrainTree(req: Request, res: Response) {
+//   try {
+//     braintree.clientToken.generate({}, function (err, response) {
+//       if (err) {
+//         return res.status(500).json({ success: false, message: err.message });
+//       }
+
+//       return res
+//         .status(200)
+//         .json({ success: true, message: "token generated", data: response });
+//     });
+//   } catch (error: any) {
+//     log.error(error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// }
+
+// export async function processBrainTreePayment(req: Request, res: Response) {
+//   try {
+//     console.log(req.body);
+//   } catch (error: any) {
+//     log.error(error);
+//     return res.status(500).json({ success: false, message: error.message });
+//   }
+// }

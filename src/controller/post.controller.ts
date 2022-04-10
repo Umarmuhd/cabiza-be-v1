@@ -78,7 +78,7 @@ export async function getSinglePostHandler(req: Request, res: Response) {
     }
 
     const post = await PostModel.findOne({ _id: post_id })
-      .populate("user", "full_name profile_picture _id")
+      .populate("user", "full_name profile_picture _id username")
       .exec();
 
     if (!post) {

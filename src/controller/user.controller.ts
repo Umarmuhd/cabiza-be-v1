@@ -9,6 +9,8 @@ import log from "../utils/logger";
 import { signAccessToken, signRefreshToken } from "../service/auth.service";
 import Stripe from "stripe";
 import queryString from "query-string";
+import fs from "fs";
+import aws from "../utils/aws";
 const Mailer = require("../utils/mailer");
 
 export async function getCurrentUserHandler(req: Request, res: Response) {
@@ -27,6 +29,47 @@ export async function onBoardingHandler(req: Request, res: Response) {
       return res
         .status(400)
         .json({ success: false, message: "user not found" });
+    }
+
+    if (req.file) {
+      const path = req.file.path;
+      const photo = fs.readFileSync(path);
+
+      await aws
+        .upload(
+          {
+            Bucket: "cabizacore",
+            ACL: "public-read",
+            Key: `avatars/${user.email}/${req.file.filename}`,
+            Body: photo,
+          },
+          {
+            partSize: 10 * 1024 * 1024,
+            queueSize: 10,
+          }
+        )
+        .send(async (err, data) => {
+          fs.unlink(path, (err) => {
+            console.log(err);
+            console.log("file deleted");
+          });
+
+          if (err) {
+            console.log(err);
+          }
+
+          user.username = username;
+          user.profile_picture = data.Location;
+          user.bio = bio;
+          user.category = category;
+          user.country = country;
+
+          await user.save();
+
+          return res
+            .status(200)
+            .json({ success: true, message: "user successfully onboard" });
+        });
     }
 
     user.username = username;
@@ -156,13 +199,11 @@ export async function addPaypalHandler(req: Request, res: Response) {
 
     await user.save();
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "paypal payment method added",
-        data: { email: req.body.paypal },
-      });
+    return res.status(200).json({
+      success: true,
+      message: "paypal payment method added",
+      data: { email: req.body.paypal },
+    });
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });

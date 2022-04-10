@@ -3,7 +3,9 @@ import {
   createNewProductHandler,
   getAllProductsHandler,
   getSingleProductHandle,
+  getTokenBrainTree,
   getUserProductsHandler,
+  processBrainTreePayment,
 } from "../controller/product.controller";
 
 import requireUser from "../middleware/requireUser";
@@ -29,5 +31,9 @@ router.get("/user/:user_id", getUserProductsHandler);
 router.get("/all", getAllProductsHandler);
 
 router.get("/product/:product_id", getSingleProductHandle);
+
+router.get("/braintree/gettoken/:user_id", getTokenBrainTree);
+
+router.post("/braintree/payment/:user_id", processBrainTreePayment);
 
 export default router;

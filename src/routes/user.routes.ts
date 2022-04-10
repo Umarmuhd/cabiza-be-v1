@@ -21,12 +21,17 @@ import {
   resetPasswordSchema,
   verifyUserSchema,
 } from "../schema/user.schema";
+import fileUpload from "../utils/file-upload";
 
 const router = express.Router();
 
 router.get("/balance/me", requireUser, getUserBalanceHandler);
 
-router.post("/onboarding", requireUser, onBoardingHandler);
+router.post(
+  "/onboarding",
+  [requireUser, fileUpload.single("photo")],
+  onBoardingHandler
+);
 
 router.get("/username/:username", findUserByUsername);
 
