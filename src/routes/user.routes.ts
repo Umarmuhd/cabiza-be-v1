@@ -6,7 +6,7 @@ import // forgotPasswordHandler,
 // verifyUserHandler,
 "../controller/user.controller";
 import {
-  addBankAccountHandler,
+  // addBankAccountHandler,
   addPaypalHandler,
   connectStripeHandler,
   findUserByUsername,
