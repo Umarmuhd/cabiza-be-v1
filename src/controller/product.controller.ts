@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import ProductModel from "../model/product.model";
 import { createProduct } from "../service/product.service";
 import log from "../utils/logger";
-import braintree from "../utils/braintree";
+// import braintree from "../utils/braintree";
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
