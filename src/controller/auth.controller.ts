@@ -8,7 +8,11 @@ import {
   signAccessToken,
   signRefreshToken,
 } from "../service/auth.service";
-import { findUserByEmail, findUserById } from "../service/user.service";
+import {
+  createUser,
+  findUserByEmail,
+  findUserById,
+} from "../service/user.service";
 import { verifyJwt } from "../utils/jwt";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
 import { nanoid } from "nanoid";
@@ -23,20 +27,16 @@ export async function signupUserHandler(
   const { full_name, email, password } = req.body;
 
   try {
-    const user = await new UserModel({
-      full_name,
-      email,
-      password,
-      activation_code: {
-        token: nanoid(),
-        expires_at: addMinutes(new Date(), 15),
-      },
-      stripe: {
-        account_id: null,
-      },
-    });
+    const user = await createUser({ full_name, email, password });
+
+    user.activation_code = {
+      token: nanoid(),
+      expires_at: addMinutes(new Date(), 15),
+    };
 
     await WalletModel.create({ user: user._id });
+
+    await user.save();
 
     const activationLink = `https://cabiza-fe-v1.vercel.app/auth/verify-email?token=${user.activation_code.token}&id=${user._id}`;
 
@@ -45,17 +45,17 @@ export async function signupUserHandler(
       subject: "Welcome to Cabiza",
     });
 
-    await user.save();
-
     return res
       .status(200)
-      .json({ message: "user created successfully", success: true });
+      .json({ message: "User created successfully", success: true });
   } catch (e: any) {
     if (e.code === 11000) {
       return res
         .status(409)
-        .json({ success: false, message: "Account already exists" });
+        .json({ success: false, message: "User already exists" });
     }
+
+    console.log(e);
 
     return res.status(500).json({ success: false, message: e });
   }
