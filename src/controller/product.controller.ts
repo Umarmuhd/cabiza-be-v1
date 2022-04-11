@@ -75,28 +75,28 @@ export async function getSingleProductHandle(req: Request, res: Response) {
   }
 }
 
-// export async function getTokenBrainTree(req: Request, res: Response) {
-//   try {
-//     braintree.clientToken.generate({}, function (err, response) {
-//       if (err) {
-//         return res.status(500).json({ success: false, message: err.message });
-//       }
+export async function getTokenBrainTree(req: Request, res: Response) {
+  try {
+    braintree.clientToken.generate({}, function (err, response) {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
 
-//       return res
-//         .status(200)
-//         .json({ success: true, message: "token generated", data: response });
-//     });
-//   } catch (error: any) {
-//     log.error(error);
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// }
+      return res
+        .status(200)
+        .json({ success: true, message: "token generated", data: response });
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
-// export async function processBrainTreePayment(req: Request, res: Response) {
-//   try {
-//     console.log(req.body);
-//   } catch (error: any) {
-//     log.error(error);
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// }
+export async function processBrainTreePayment(req: Request, res: Response) {
+  try {
+    console.log(req.body);
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}

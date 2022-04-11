@@ -32,7 +32,7 @@
   },
   "dependencies": {
     "@typegoose/typegoose": "^9.3.1",
-    "argon2": "^0.28.3",
+    "argon2": "^0.28.5",
     "axios": "^0.26.0",
     "bcrypt": "^5.0.1",
     "braintree": "^3.11.0",

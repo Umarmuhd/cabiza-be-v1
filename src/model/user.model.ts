@@ -20,6 +20,8 @@ export const privateFields = [
 ];
 
 @pre<User>("save", async function (next) {
+  console.log("here");
+
   if (!this.isModified("password")) {
     return next();
   }
@@ -42,17 +44,16 @@ export const privateFields = [
   },
 })
 
-class BankAccount {
-  @prop()
-  public account_number: string | null;
+// class BankAccount {
+//   @prop()
+//   public account_number: string | null;
 
-  @prop()
-  public account_name: string | null;
+//   @prop()
+//   public account_name: string | null;
 
-  @prop()
-  public bank_code: string | null;
-}
-
+//   @prop()
+//   public bank_code: string | null;
+// }
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
   email: string;
@@ -120,10 +121,10 @@ export class User {
   @prop()
   paypal: {
     email: string | null;
-  }
+  };
 
-  @prop()
-  bank_account?: BankAccount;
+  // @prop()
+  // bank_account?: BankAccount;
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {
