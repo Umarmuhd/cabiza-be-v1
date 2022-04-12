@@ -23,12 +23,17 @@ enum CurrencyEnum {
   "Dollars - $",
   "Euro - €",
 }
+enum ProductTypeEnum {
+  "Instant",
+  "Presale",
+  "Membership",
+}
 
 export class Product {
   @prop({ required: true, unique: true, default: () => `product_${nanoid()}` })
   product_id: string;
 
-  @prop({ ref: () => User })
+  @prop({ ref: () => User, required: true })
   user: Ref<User>;
 
   @prop()
@@ -43,7 +48,7 @@ export class Product {
   @prop()
   redirect_url: string;
 
-  @prop({ required: true })
+  @prop({})
   url: string;
 
   @prop({})
@@ -69,6 +74,9 @@ export class Product {
 
   @prop({ enum: CategoriesEnum, default: 0 })
   categories: CategoriesEnum;
+
+  @prop({ enum: ProductTypeEnum, default: 0 })
+  product_type: ProductTypeEnum;
 
   @prop({ enum: CurrencyEnum, default: 1 })
   currency: CurrencyEnum;

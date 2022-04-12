@@ -20,8 +20,6 @@ export const privateFields = [
 ];
 
 @pre<User>("save", async function (next) {
-  console.log("here");
-
   if (!this.isModified("password")) {
     return next();
   }
