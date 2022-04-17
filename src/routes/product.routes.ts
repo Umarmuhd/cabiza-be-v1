@@ -9,6 +9,7 @@ import {
   updateProductBasics,
   updateProductContentHandler,
   updateProductInfoHandler,
+  updateProductPricingHandler,
 } from "../controller/product.controller";
 
 import requireUser from "../middleware/requireUser";
@@ -55,6 +56,12 @@ router.post(
   "/product/:product_id/content",
   [requireUser, fileUpload.single("file")],
   updateProductContentHandler
+);
+
+router.post(
+  "/product/:product_id/pricing",
+  requireUser,
+  updateProductPricingHandler
 );
 
 router.get("/braintree/gettoken/:user_id", getTokenBrainTree);

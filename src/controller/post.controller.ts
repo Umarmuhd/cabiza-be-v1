@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import PostModel from "../model/post.model";
 import { createPost } from "../service/post.service";
 import log from "../utils/logger";
+import aws from "../utils/aws";
 
 export async function createNewPostHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -12,6 +13,87 @@ export async function createNewPostHandler(req: Request, res: Response) {
     return res
       .status(201)
       .json({ success: true, message: "post created", data: { post } });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function updatePostHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const post_id = req.params.post_id;
+
+  const attachment = req.file;
+
+  const { title, description, call_to_action, audience, channel, engagements } =
+    req.body;
+
+  try {
+    const post = await PostModel.findOne({ post_id });
+    if (!post) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post not found" });
+    }
+
+    if (post.user?.toString() !== user_id) {
+      return res
+        .status(403)
+        .json({ success: false, message: "user unauthorized" });
+    }
+
+    if (req.file) {
+      aws
+        .upload(
+          {
+            Bucket: "cabizacore",
+            ACL: "public-read",
+            Key: `post/${post.post_id}/${attachment?.filename}`,
+            //@ts-ignore
+            Body: fs.readFileSync(product_file?.path),
+          },
+          {
+            partSize: 10 * 1024 * 1024,
+            queueSize: 10,
+          }
+        )
+        .send(async (error: any, data: any) => {
+          if (error) {
+            return res
+              .status(400)
+              .json({ success: false, message: error.message });
+          }
+
+          post.title = title;
+          post.description = description;
+          post.call_to_action = call_to_action;
+          post.audience = audience;
+          post.channel = channel;
+          post.engagements = engagements;
+          post.attachment = data.Location;
+          await post.save();
+
+          return res.status(200).json({
+            success: true,
+            message: "post info updated",
+            data: { post },
+          });
+        });
+    }
+
+    post.title = title;
+    post.description = description;
+    post.call_to_action = call_to_action;
+    post.audience = audience;
+    post.channel = channel;
+    post.engagements = engagements;
+
+    await post.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "post updated", data: { post } });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });

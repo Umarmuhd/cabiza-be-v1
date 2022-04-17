@@ -5,6 +5,7 @@ import {
   getSinglePostHandler,
   getUserPostsHandler,
   publishingHandler,
+  updatePostHandler,
 } from "../controller/post.controller";
 import requireUser from "../middleware/requireUser";
 import fileUpload from "../utils/file-upload";
@@ -17,6 +18,12 @@ router.post(
   "/new",
   [requireUser, fileUpload.single("attachment")],
   createNewPostHandler
+);
+
+router.patch(
+  "/post/:post_id",
+  [requireUser, fileUpload.single("attachment")],
+  updatePostHandler
 );
 
 router.get("/user/:user_id", getUserPostsHandler);

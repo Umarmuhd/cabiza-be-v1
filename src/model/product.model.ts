@@ -13,6 +13,17 @@ class Affiliate {
   public percent?: number;
 }
 
+class UserPriced {
+  @prop()
+  public user_priced?: boolean;
+
+  @prop({ default: 0 })
+  public min_percent?: number;
+
+  @prop({ default: 0 })
+  public max_percent?: number;
+}
+
 enum CategoriesEnum {
   "Education",
   "Crafts & DIY",
@@ -63,8 +74,8 @@ export class Product {
   @prop({ required: true, default: 0 })
   price: number;
 
-  @prop({ default: false })
-  user_priced: boolean;
+  @prop({ ref: () => UserPriced })
+  user_priced: Ref<UserPriced>; //
 
   @prop()
   call_to_action: string;
