@@ -4,7 +4,7 @@ import ProductModel from "../model/product.model";
 import { createProduct } from "../service/product.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
-// import braintree from "../utils/braintree";
+import braintree from "../utils/braintree";
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -219,6 +219,42 @@ export async function updateProductContentHandler(req: Request, res: Response) {
   }
 }
 
+export async function updateProductPricingHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+  const product_id = req.params.product_id;
+
+  const { user_priced, min_percent, max_percent, price } = req.body;
+
+  try {
+    const product = await ProductModel.findOne({ product_id });
+    if (!product) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    if (product.user?.toString() !== user_id) {
+      return res
+        .status(403)
+        .json({ success: false, message: "user unauthorized" });
+    }
+
+    product.user_priced = { user_priced, min_percent, max_percent };
+    product.price = price;
+
+    await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "product info updated",
+      data: { product },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
 export async function getUserProductsHandler(req: Request, res: Response) {
   const user_id = req.params.user_id;
 
@@ -274,19 +310,20 @@ export async function getSingleProductHandle(req: Request, res: Response) {
 }
 
 export async function getTokenBrainTree(req: Request, res: Response) {
-  // try {
-  //   braintree.clientToken.generate({}, function (err, response) {
-  //     if (err) {
-  //       return res.status(500).json({ success: false, message: err.message });
-  //     }
-  //     return res
-  //       .status(200)
-  //       .json({ success: true, message: "token generated", data: response });
-  //   });
-  // } catch (error: any) {
-  //   log.error(error);
-  //   return res.status(500).json({ success: false, message: error.message });
-  // }
+  try {
+    //@ts-ignore
+    braintree.clientToken.generate({}, function (err: any, response: any) {
+      if (err) {
+        return res.status(500).json({ success: false, message: err.message });
+      }
+      return res
+        .status(200)
+        .json({ success: true, message: "token generated", data: response });
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
 }
 
 export async function processBrainTreePayment(req: Request, res: Response) {
