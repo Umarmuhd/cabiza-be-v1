@@ -58,11 +58,11 @@ export class Post {
   // @prop({ ref: () => Channel })
   // channel?: Ref<Channel>[];
 
-  @prop({ type: String, required: true, default: ["1"] })
-  channel: mongoose.Types.Array<string>;
+  @prop({ type: String, required: true, default: [1] })
+  channel: number[];
 
   @prop({ type: String, required: true, default: [] })
-  engagements: mongoose.Types.Array<string>;
+  engagements: number[];
 
   // @prop({ ref: () => Engagement })
   // engagement?: Ref<Engagement>[];

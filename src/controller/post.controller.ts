@@ -3,12 +3,28 @@ import PostModel from "../model/post.model";
 import { createPost } from "../service/post.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
+import fs from "fs";
 
 export async function createNewPostHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
+  const body = req.body;
+
   try {
-    const post = await createPost({ ...req.body, user: user_id });
+    const channel = [];
+    req.body.send_email === "true" && channel.push(0);
+    req.body.post_to_profile === "true" && channel.push(1);
+
+    const engagements = [];
+    req.body.allow_comments === "true" && engagements.push(0);
+    req.body.allow_likes === "true" && engagements.push(1);
+
+    const post = await createPost({
+      ...body,
+      user: user_id,
+      channel,
+      engagements,
+    });
 
     return res
       .status(201)
@@ -26,8 +42,15 @@ export async function updatePostHandler(req: Request, res: Response) {
 
   const attachment = req.file;
 
-  const { title, description, call_to_action, audience, channel, engagements } =
-    req.body;
+  const { title, description, call_to_action, audience } = req.body;
+
+  const channel = [];
+  req.body.send_email === "true" && channel.push(0);
+  req.body.post_to_profile === "true" && channel.push(1);
+
+  const engagements = [];
+  req.body.allow_comments === "true" && engagements.push(0);
+  req.body.allow_likes === "true" && engagements.push(1);
 
   try {
     const post = await PostModel.findOne({ post_id });
@@ -43,6 +66,13 @@ export async function updatePostHandler(req: Request, res: Response) {
         .json({ success: false, message: "user unauthorized" });
     }
 
+    post.title = title;
+    post.description = description;
+    post.call_to_action = call_to_action;
+    post.audience = audience;
+    post.channel = channel;
+    post.engagements = engagements;
+
     if (req.file) {
       aws
         .upload(
@@ -51,7 +81,7 @@ export async function updatePostHandler(req: Request, res: Response) {
             ACL: "public-read",
             Key: `post/${post.post_id}/${attachment?.filename}`,
             //@ts-ignore
-            Body: fs.readFileSync(product_file?.path),
+            Body: fs.readFileSync(attachment?.path),
           },
           {
             partSize: 10 * 1024 * 1024,
@@ -65,29 +95,15 @@ export async function updatePostHandler(req: Request, res: Response) {
               .json({ success: false, message: error.message });
           }
 
-          post.title = title;
-          post.description = description;
-          post.call_to_action = call_to_action;
-          post.audience = audience;
-          post.channel = channel;
-          post.engagements = engagements;
           post.attachment = data.Location;
+
           await post.save();
 
-          return res.status(200).json({
-            success: true,
-            message: "post info updated",
-            data: { post },
-          });
+          return res
+            .status(200)
+            .json({ success: true, message: "post updated", data: { post } });
         });
     }
-
-    post.title = title;
-    post.description = description;
-    post.call_to_action = call_to_action;
-    post.audience = audience;
-    post.channel = channel;
-    post.engagements = engagements;
 
     await post.save();
 
