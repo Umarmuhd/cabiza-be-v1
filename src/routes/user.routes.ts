@@ -12,6 +12,7 @@ import {
   findUserByUsername,
   getUserBalanceHandler,
   onBoardingHandler,
+  updateUserAvatar,
 } from "../controller/user.controller";
 import requireUser from "../middleware/requireUser";
 import validateResource from "../middleware/validateResource";
@@ -31,6 +32,12 @@ router.post(
   "/onboarding",
   [requireUser, fileUpload.single("photo")],
   onBoardingHandler
+);
+
+router.put(
+  "/avatar",
+  [requireUser, fileUpload.array("image", 1)],
+  updateUserAvatar
 );
 
 router.get("/username/:username", findUserByUsername);

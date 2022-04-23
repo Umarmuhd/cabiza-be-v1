@@ -31,6 +31,11 @@ const port = config.get("port");
 
 app.listen(port, () => {
   log.info(`App started at http://localhost:${port}`);
-
   connectToDb();
 });
+
+// var cron = require("node-cron");
+
+// cron.schedule("* * * * *", () => {
+//   console.log("running a task every minute");
+// });

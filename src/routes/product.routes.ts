@@ -6,10 +6,7 @@ import {
   getTokenBrainTree,
   getUserProductsHandler,
   processBrainTreePayment,
-  updateProductBasics,
-  updateProductContentHandler,
-  updateProductInfoHandler,
-  updateProductPricingHandler,
+  updateProductHandler,
 } from "../controller/product.controller";
 
 import requireUser from "../middleware/requireUser";
@@ -39,7 +36,7 @@ router.get("/all", getAllProductsHandler);
 router.get("/product/:product_id", getSingleProductHandle);
 
 router.post(
-  "/product/:product_id/basics",
+  "/product/:product_id",
   [
     requireUser,
     fileUpload.fields([
@@ -47,21 +44,7 @@ router.post(
       { name: "cover_image", maxCount: 1 },
     ]),
   ],
-  updateProductBasics
-);
-
-router.post("/product/:product_id/info", requireUser, updateProductInfoHandler);
-
-router.post(
-  "/product/:product_id/content",
-  [requireUser, fileUpload.single("file")],
-  updateProductContentHandler
-);
-
-router.post(
-  "/product/:product_id/pricing",
-  requireUser,
-  updateProductPricingHandler
+  updateProductHandler
 );
 
 router.get("/braintree/gettoken/:user_id", getTokenBrainTree);
