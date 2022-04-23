@@ -10,50 +10,6 @@ import { creditEarningsBalance } from "../service/wallet.service";
 import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
-export async function createNewOrderHandler(req: Request, res: Response) {
-  const { name, email, discount_code, price } = req.body;
-  const product_id = req.params.product_id;
-
-  try {
-    const product = await ProductModel.findOne({ product_id });
-
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "product not found" });
-    }
-
-    const order = await createOrder({
-      user: { full_name: name, email },
-      discount_code,
-      final_price: price,
-      price,
-      product: product._id,
-    });
-
-    if (!order) {
-      return res
-        .status(400)
-        .json({ success: false, message: "can't create order" });
-    }
-
-    const pay_link = await createPaymentLink(order);
-
-    order.pay_link = pay_link.data.data.link;
-
-    await order.save();
-
-    return res.status(201).json({
-      success: true,
-      message: "product created successful",
-      data: { order },
-    });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(500).json({ success: false, message: error.message });
-  }
-}
-
 export async function orderCompleteHandler(req: Request, res: Response) {
   const { trxn_id, tx_ref } = req.params;
 
@@ -90,14 +46,6 @@ export async function orderCompleteHandler(req: Request, res: Response) {
         .json({ success: false, message: "Order not found" });
     }
 
-    if (order.order_paid) {
-      return res.status(202).json({
-        success: true,
-        message: "order is already paid",
-        data: { paid: true },
-      });
-    }
-
     const credit = await creditEarningsBalance({
       //@ts-ignore
       amount: order?.product?.price,
@@ -111,7 +59,6 @@ export async function orderCompleteHandler(req: Request, res: Response) {
         .json({ success: false, message: "an error occurred" });
     }
 
-    order.order_paid = true;
     await order.save();
 
     await Mailer.send("order-confirm", order.user, {
@@ -125,5 +72,70 @@ export async function orderCompleteHandler(req: Request, res: Response) {
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function createPaidOrderHandler(req: Request, res: Response) {
+  const { user, amount, discount_code, payment_info } = req.body;
+
+  const product_id = req.params.product_id;
+  try {
+    const product = await ProductModel.findOne({ product_id });
+
+    if (!product) {
+      return res
+        .status(400)
+        .json({ success: false, message: "product not found" });
+    }
+
+    const existing_order = await OrderModel.findOne({
+      payment_id: payment_info.payment_id,
+    });
+
+    if (existing_order) {
+      return res
+        .status(409)
+        .json({ success: false, message: "Order already exists" });
+    }
+
+    const order = await createOrder({
+      user,
+      discount_code,
+      final_price: amount,
+      price: amount,
+      product: product._id,
+      payment_id: payment_info.payment_id,
+      payment_method: payment_info.payment_method,
+    });
+
+    if (!order) {
+      return res
+        .status(400)
+        .json({ success: false, message: "can't create order" });
+    }
+
+    const credit = await creditEarningsBalance({ amount, user: product.user });
+
+    if (!credit.success) {
+      return res
+        .status(500)
+        .json({ success: false, message: "an error occurred" });
+    }
+
+    await Mailer.send("order-confirm", order.user, {
+      orderId: order.order_id,
+      subject: "Order Complete",
+    });
+
+    order.status = "complete";
+
+    await order.save();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Payment successfully made" });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
   }
 }

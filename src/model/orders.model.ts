@@ -23,6 +23,12 @@ export class Order {
   @prop({})
   pay_link: string;
 
+  @prop()
+  payment_method: string;
+
+  @prop()
+  payment_id: string;
+
   @prop({ required: true, default: 0 })
   final_price: number;
 
@@ -32,8 +38,8 @@ export class Order {
   @prop({ default: null })
   discount_code: string | null;
 
-  @prop({ default: false })
-  order_paid: boolean;
+  @prop({ default: "processing" })
+  status: string;
 }
 
 const OrderModel = getModelForClass(Order, {

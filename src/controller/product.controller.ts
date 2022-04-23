@@ -23,6 +23,55 @@ export async function createNewProductHandler(req: Request, res: Response) {
   }
 }
 
+export async function updateProductHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const product_id = req.params.product_id;
+
+  const { name, description, call_to_action, summary, url } = req.body;
+  const { user_priced, min_percent, max_percent, price } = req.body;
+
+  try {
+    let product = await ProductModel.findOne({ product_id });
+    if (!product) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    if (product.user?.toString() !== user_id) {
+      return res
+        .status(403)
+        .json({ success: false, message: "user unauthorized" });
+    }
+
+    // const user_priced = {};
+
+    // product.name = name;
+    // product.description = description;
+    // product.call_to_action = call_to_action;
+    // product.summary = summary;
+    // product.url = url;
+    // product.user_priced = { user_priced, min_percent, max_percent };
+    // product.price = price;
+
+    // await product.save();
+
+    product = await ProductModel.findByIdAndUpdate(product_id, req.body, {
+      new: true,
+      useFindAndModify: false,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: { product },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
 export async function updateProductBasics(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
@@ -113,42 +162,6 @@ export async function updateProductBasics(req: Request, res: Response) {
   }
 }
 
-export async function updateProductInfoHandler(req: Request, res: Response) {
-  const user_id = res.locals.user._id;
-  const product_id = req.params.product_id;
-
-  const { call_to_action, summary } = req.body;
-
-  try {
-    const product = await ProductModel.findOne({ product_id });
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    if (product.user?.toString() !== user_id) {
-      return res
-        .status(403)
-        .json({ success: false, message: "user unauthorized" });
-    }
-
-    product.call_to_action = call_to_action;
-    product.summary = summary;
-
-    await product.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "product info updated",
-      data: { product },
-    });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
-  }
-}
-
 export async function updateProductContentHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
   const product_id = req.params.product_id;
@@ -205,42 +218,6 @@ export async function updateProductContentHandler(req: Request, res: Response) {
     }
 
     product.url = url;
-
-    await product.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "product info updated",
-      data: { product },
-    });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
-  }
-}
-
-export async function updateProductPricingHandler(req: Request, res: Response) {
-  const user_id = res.locals.user._id;
-  const product_id = req.params.product_id;
-
-  const { user_priced, min_percent, max_percent, price } = req.body;
-
-  try {
-    const product = await ProductModel.findOne({ product_id });
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    if (product.user?.toString() !== user_id) {
-      return res
-        .status(403)
-        .json({ success: false, message: "user unauthorized" });
-    }
-
-    product.user_priced = { user_priced, min_percent, max_percent };
-    product.price = price;
 
     await product.save();
 
@@ -328,7 +305,26 @@ export async function getTokenBrainTree(req: Request, res: Response) {
 
 export async function processBrainTreePayment(req: Request, res: Response) {
   try {
-    console.log(req.body);
+    let nonceFromTheClient = req.body.paymentMethodNonce;
+    let amountFromTheClient = req.body.amount;
+
+    // charge
+    let newTransaction = braintree.transaction.sale(
+      {
+        amount: amountFromTheClient,
+        paymentMethodNonce: nonceFromTheClient,
+        options: {
+          submitForSettlement: true,
+        },
+      },
+      (error: any, result: any) => {
+        if (error) {
+          res.status(500).json(error);
+        } else {
+          res.json(result);
+        }
+      }
+    );
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });

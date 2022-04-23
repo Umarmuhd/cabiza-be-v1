@@ -13,6 +13,60 @@ import fs from "fs";
 import aws from "../utils/aws";
 const Mailer = require("../utils/mailer");
 
+export async function updateUserAvatar(req: Request, res: Response) {
+  const userId = res.locals.user._id;
+
+  const user = await UserModel.findById({ _id: userId });
+
+  if (!user) {
+    return res.status(409).send({
+      success: false,
+      message: "You Are not authorized to make this request",
+    });
+  }
+
+  const files = req.files as Express.Multer.File[];
+
+  if (files) {
+    const file = fs.readFileSync(files[0].path);
+
+    aws
+      .upload(
+        {
+          Bucket: "cabizacore",
+          ACL: "public-read",
+          Key: `avatars/${user.username}/${files[0].filename}`,
+          Body: file,
+        },
+        {
+          partSize: 10 * 1024 * 1024,
+          queueSize: 10,
+        }
+      )
+      .send((err, data) => {
+        if (err) return res.status(500).send(err);
+
+        fs.unlink(files[0].path, (err) => {
+          console.log(err);
+          console.log("file deleted");
+        });
+
+        user.profile_picture = data.Location;
+        user.save();
+
+        res.status(201).json({
+          success: true,
+          message: "Image upload successful",
+          data: { picture: user.profile_picture },
+        });
+      });
+  } else {
+    return res
+      .status(200)
+      .json({ success: false, message: "image upload failed" });
+  }
+}
+
 export async function getCurrentUserHandler(req: Request, res: Response) {
   return res.send(res.locals.user);
 }
