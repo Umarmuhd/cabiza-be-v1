@@ -317,6 +317,7 @@ export async function processBrainTreePayment(req: Request, res: Response) {
           submitForSettlement: true,
         },
       },
+      //@ts-ignore
       (error: any, result: any) => {
         if (error) {
           res.status(500).json(error);
