@@ -72,166 +72,6 @@ export async function updateProductHandler(req: Request, res: Response) {
   }
 }
 
-export async function updateProductBasics(req: Request, res: Response) {
-  const user_id = res.locals.user._id;
-
-  const product_id = req.params.product_id;
-
-  const { name, description } = req.body;
-
-  try {
-    const product = await ProductModel.findOne({ product_id });
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    if (product.user?.toString() !== user_id) {
-      return res
-        .status(403)
-        .json({ success: false, message: "user unauthorized" });
-    }
-
-    product.name = name;
-    product.description = description;
-
-    //@ts-ignore
-    if (Object.keys(req?.files).length > 0) {
-      //@ts-ignore
-      const { thumbnail, cover_image } = req.files;
-      const files = [thumbnail[0], cover_image[0]];
-
-      aws.createBucket(() => {
-        let Bucket_Path = "cabizacore";
-        let ResponseData: any = [];
-
-        files.map((item) => {
-          let params = {
-            Bucket: Bucket_Path,
-            Key: `product/${product.product_id}/${item.filename}`,
-            Body: fs.readFileSync(item.path),
-            ACL: "public-read",
-          };
-
-          //@ts-ignore
-          aws.upload(params, async function (err: any, data: any) {
-            if (err) {
-              return res
-                .status(400)
-                .json({ status: "failed", message: "can't upload document" });
-            } else {
-              ResponseData.push(data);
-
-              fs.unlink(item.path, (err) => {
-                console.log(err);
-              });
-
-              if (ResponseData.length == files.length) {
-                const uploads: string[] = [];
-
-                ResponseData.forEach((doc: any) => uploads.push(doc.Location));
-
-                product.thumbnail = uploads[0];
-                product.cover_image = uploads[1];
-
-                await product.save();
-
-                return res.status(201).json({
-                  success: true,
-                  message: "product updated successfully",
-                  data: { product },
-                });
-              }
-            }
-          });
-        });
-      });
-    }
-
-    await product.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "product updated successfully",
-      data: { product },
-    });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
-  }
-}
-
-export async function updateProductContentHandler(req: Request, res: Response) {
-  const user_id = res.locals.user._id;
-  const product_id = req.params.product_id;
-
-  try {
-    const url = req.body.url;
-    const product_file = req.file;
-
-    const product = await ProductModel.findOne({ product_id });
-    if (!product) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Product not found" });
-    }
-
-    if (product.user?.toString() !== user_id) {
-      return res
-        .status(403)
-        .json({ success: false, message: "user unauthorized" });
-    }
-
-    if (req.file) {
-      aws
-        .upload(
-          {
-            Bucket: "cabizacore",
-            ACL: "public-read",
-            Key: `product/${product.product_id}/${product_file?.filename}`,
-            //@ts-ignore
-            Body: fs.readFileSync(product_file?.path),
-          },
-          {
-            partSize: 10 * 1024 * 1024,
-            queueSize: 10,
-          }
-        )
-        .send(async (error, data) => {
-          if (error) {
-            return res
-              .status(400)
-              .json({ success: false, message: error.message });
-          }
-
-          product.url = url;
-          product.file = data.Location;
-          await product.save();
-
-          return res.status(200).json({
-            success: true,
-            message: "product info updated",
-            data: { product },
-          });
-        });
-    }
-
-    product.url = url;
-
-    await product.save();
-
-    return res.status(200).json({
-      success: true,
-      message: "product info updated",
-      data: { product },
-    });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
-  }
-}
-
 export async function getUserProductsHandler(req: Request, res: Response) {
   const user_id = req.params.user_id;
 
@@ -249,7 +89,7 @@ export async function getUserProductsHandler(req: Request, res: Response) {
 
 export async function getAllProductsHandler(req: Request, res: Response) {
   try {
-    const products = await ProductModel.find({})
+    const products = await ProductModel.find({ published: true })
       .populate("user", "full_name profile_picture category username")
       .exec();
 
@@ -258,6 +98,42 @@ export async function getAllProductsHandler(req: Request, res: Response) {
         .status(200)
         .json({ success: true, message: "products list", data: { products } });
     }
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function getAllUserPublishedProduct(req: Request, res: Response) {}
+
+export async function handleProductPublishing(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+  const product_id = req.params.product_id;
+
+  try {
+    const product = await ProductModel.findById(product_id);
+
+    if (!product) {
+      return res
+        .status(400)
+        .json({ success: false, message: "product not found" });
+    }
+
+    if (product.user?.toString() !== user_id) {
+      return res.status(403).json({
+        success: false,
+        message: "user unauthorized to perform action",
+      });
+    }
+
+    product.published = !product.published;
+    await product.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `product ${product.published ? "published" : "unpublished"}`,
+      data: { product },
+    });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });

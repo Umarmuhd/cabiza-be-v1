@@ -14,7 +14,7 @@ class Affiliate {
 }
 
 class UserPriced {
-  @prop()
+  @prop({})
   public user_priced?: boolean;
 
   @prop({ default: 0 })
@@ -93,7 +93,10 @@ export class Product {
   currency: CurrencyEnum;
 
   @prop({ ref: () => Affiliate })
-  affiliate: Ref<Affiliate>; //
+  affiliate: Ref<Affiliate>;
+
+  @prop({ default: false })
+  published: boolean;
 }
 
 const ProductModel = getModelForClass(Product, {
