@@ -13,7 +13,7 @@ export async function creditEarningsBalance({
     return { success: false, message: "wallet not found" };
   }
 
-  wallet.earnings += amount;
+  wallet.earnings += +amount;
 
   await wallet.save();
 
