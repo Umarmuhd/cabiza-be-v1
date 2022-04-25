@@ -1,11 +1,7 @@
 import { Request, Response } from "express";
 import OrderModel from "../model/orders.model";
 import ProductModel from "../model/product.model";
-import {
-  createOrder,
-  createPaymentLink,
-  getOrderPaymentStatus,
-} from "../service/order.service";
+import { createOrder, getOrderPaymentStatus } from "../service/order.service";
 import { creditEarningsBalance } from "../service/wallet.service";
 import log from "../utils/logger";
 const Mailer = require("../utils/mailer");

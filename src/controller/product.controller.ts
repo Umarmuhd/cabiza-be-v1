@@ -28,9 +28,6 @@ export async function updateProductHandler(req: Request, res: Response) {
 
   const product_id = req.params.product_id;
 
-  const { name, description, call_to_action, summary, url } = req.body;
-  const { user_priced, min_percent, max_percent, price } = req.body;
-
   try {
     let product = await ProductModel.findOne({ product_id });
     if (!product) {
@@ -45,19 +42,51 @@ export async function updateProductHandler(req: Request, res: Response) {
         .json({ success: false, message: "user unauthorized" });
     }
 
-    // const user_priced = {};
+    const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
-    // product.name = name;
-    // product.description = description;
-    // product.call_to_action = call_to_action;
-    // product.summary = summary;
-    // product.url = url;
-    // product.user_priced = { user_priced, min_percent, max_percent };
-    // product.price = price;
+    if (files["thumbnail"]) {
+      const thumbnail = files["thumbnail"][0];
 
-    // await product.save();
+      const params = {
+        Bucket: "cabizacore",
+        ACL: "public-read",
+        Key: `products/${product_id}/${thumbnail.filename}`,
+        Body: fs.readFileSync(thumbnail.path),
+      };
 
-    product = await ProductModel.findByIdAndUpdate(product_id, req.body, {
+      const stored = await aws.upload(params).promise();
+      req.body.thumbnail = stored.Location;
+    }
+
+    if (files["cover_image"]) {
+      const cover_image = files["cover_image"][0];
+
+      const params = {
+        Bucket: "cabizacore",
+        ACL: "public-read",
+        Key: `products/${product_id}/${cover_image.filename}`,
+        Body: fs.readFileSync(cover_image.path),
+      };
+
+      const stored = await aws.upload(params).promise();
+      req.body.cover_image = stored.Location;
+    }
+
+    if (files["file"]) {
+      const file = files["file"][0];
+
+      const params = {
+        Bucket: "cabizacore",
+        ACL: "public-read",
+        Key: `products/${product_id}/${file.filename}`,
+        Body: fs.readFileSync(file.path),
+      };
+
+      const stored = await aws.upload(params).promise();
+      req.body.file = stored.Location;
+    }
+
+    product = await ProductModel.findByIdAndUpdate(product._id, req.body, {
       new: true,
       useFindAndModify: false,
     });

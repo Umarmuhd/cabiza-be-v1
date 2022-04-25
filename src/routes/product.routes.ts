@@ -30,6 +30,7 @@ router.post(
     fileUpload.fields([
       { name: "thumbnail", maxCount: 1 },
       { name: "cover_image", maxCount: 1 },
+      { name: "file", maxCount: 1 },
     ]),
   ],
   updateProductHandler
