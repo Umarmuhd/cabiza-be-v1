@@ -2,6 +2,7 @@ import express from "express";
 import {
   createNewProductHandler,
   getAllProductsHandler,
+  getAllUserPublishedProduct,
   getSingleProductHandle,
   getTokenBrainTree,
   getUserProductsHandler,
@@ -18,6 +19,8 @@ const router = express.Router();
 router.post("/new", requireUser, createNewProductHandler);
 
 router.get("/user/:user_id", getUserProductsHandler);
+
+router.get("/user", getAllUserPublishedProduct);
 
 router.get("/all", getAllProductsHandler);
 

@@ -5,6 +5,7 @@ import { createProduct } from "../service/product.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
 import braintree from "../utils/braintree";
+import { findUserByUsername } from "../service/user.service";
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -28,6 +29,8 @@ export async function updateProductHandler(req: Request, res: Response) {
 
   const product_id = req.params.product_id;
 
+  console.log(req.body);
+
   try {
     let product = await ProductModel.findOne({ product_id });
     if (!product) {
@@ -41,6 +44,9 @@ export async function updateProductHandler(req: Request, res: Response) {
         .status(403)
         .json({ success: false, message: "user unauthorized" });
     }
+
+    const { user_priced, min_price, max_price } = req.body;
+    const user_priced_ = {};
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -133,7 +139,28 @@ export async function getAllProductsHandler(req: Request, res: Response) {
   }
 }
 
-export async function getAllUserPublishedProduct(req: Request, res: Response) {}
+export async function getAllUserPublishedProduct(req: Request, res: Response) {
+  const username = req.query.username as string;
+
+  try {
+    const user = await findUserByUsername(username);
+
+    if (!user) {
+      res.status(400).json({ success: false, message: "user not found" });
+      return;
+    }
+
+    const products = await ProductModel.find({
+      user: user._id,
+      published: true,
+    });
+
+    res.status(200).json({ success: true, data: { products } });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
 
 export async function handleProductPublishing(req: Request, res: Response) {
   const user_id = res.locals.user._id;
