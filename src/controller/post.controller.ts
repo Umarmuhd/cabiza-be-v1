@@ -4,6 +4,7 @@ import { createPost } from "../service/post.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
 import fs from "fs";
+import { findUserByUsername } from "../service/user.service";
 
 export async function createNewPostHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -225,5 +226,28 @@ export async function publishingHandler(req: Request, res: Response) {
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function getAllUserPublishedPosts(req: Request, res: Response) {
+  const username = req.query.username as string;
+
+  try {
+    const user = await findUserByUsername(username);
+
+    if (!user) {
+      res.status(400).json({ success: false, message: "user not found" });
+      return;
+    }
+
+    const posts = await PostModel.find({
+      user: user._id,
+      published: true,
+    }).populate("user", "username");
+
+    res.status(200).json({ success: true, data: { posts } });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
   }
 }

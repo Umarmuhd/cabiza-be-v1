@@ -2,6 +2,7 @@ import express from "express";
 import {
   createNewPostHandler,
   deletePostsHandler,
+  getAllUserPublishedPosts,
   getSinglePostHandler,
   getUserPostsHandler,
   publishingHandler,
@@ -27,6 +28,8 @@ router.patch(
 );
 
 router.get("/user/:user_id", getUserPostsHandler);
+
+router.get("/user", getAllUserPublishedPosts);
 
 router.delete("/post/:post_id", requireUser, deletePostsHandler);
 
