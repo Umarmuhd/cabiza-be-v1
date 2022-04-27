@@ -29,8 +29,6 @@ export async function updateProductHandler(req: Request, res: Response) {
 
   const product_id = req.params.product_id;
 
-  console.log(req.body);
-
   try {
     let product = await ProductModel.findOne({ product_id });
     if (!product) {
@@ -44,9 +42,6 @@ export async function updateProductHandler(req: Request, res: Response) {
         .status(403)
         .json({ success: false, message: "user unauthorized" });
     }
-
-    const { user_priced, min_price, max_price } = req.body;
-    const user_priced_ = {};
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 

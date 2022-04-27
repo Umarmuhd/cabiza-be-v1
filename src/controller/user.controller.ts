@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { nanoid } from "nanoid";
 import { addMinutes, isAfter } from "date-fns";
+import { omit } from "lodash";
 import UserModel from "../model/user.model";
 import WalletModel from "../model/wallet.model";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
@@ -237,26 +238,23 @@ export async function getUserBalanceHandler(req: Request, res: Response) {
   }
 }
 
-export async function addPaypalHandler(req: Request, res: Response) {
+export async function updateUserProfileHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
   try {
-    const user = await UserModel.findById(user_id).exec();
-
+    let user = await UserModel.findById(user_id).exec();
     if (!user) {
       return res
         .status(400)
         .json({ success: false, message: "user not found" });
     }
 
-    user.paypal.email = req.body.paypal;
+    user = await UserModel.findByIdAndUpdate(user._id, req.body);
 
-    await user.save();
-
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       message: "paypal payment method added",
-      data: { email: req.body.paypal },
+      data: { user },
     });
   } catch (error: any) {
     log.error(error);
