@@ -41,17 +41,6 @@ export const privateFields = [
     allowMixed: Severity.ALLOW,
   },
 })
-
-// class BankAccount {
-//   @prop()
-//   public account_number: string | null;
-
-//   @prop()
-//   public account_name: string | null;
-
-//   @prop()
-//   public bank_code: string | null;
-// }
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
   email: string;
@@ -80,8 +69,16 @@ export class User {
   @prop({})
   category: string;
 
+  @prop()
+  address: {
+    street_name: string;
+    postal_code: string;
+    city: string;
+    country: string;
+  };
+
   @prop({})
-  country: string;
+  birthday: string;
 
   @prop({})
   bvn: string;
@@ -121,8 +118,12 @@ export class User {
     email: string | null;
   };
 
-  // @prop()
-  // bank_account?: BankAccount;
+  @prop()
+  bank_account?: {
+    bank_code: string;
+    account_name: string;
+    account_number: string;
+  };
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {
     try {

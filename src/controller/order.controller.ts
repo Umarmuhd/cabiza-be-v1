@@ -1,8 +1,12 @@
 import { Request, Response } from "express";
 import OrderModel from "../model/orders.model";
 import ProductModel from "../model/product.model";
+import AffiliateModel from "../model/affiliates.models";
 import { createOrder, getOrderPaymentStatus } from "../service/order.service";
-import { creditEarningsBalance } from "../service/wallet.service";
+import {
+  creditAffiliateEarnings,
+  creditEarningsBalance,
+} from "../service/wallet.service";
 import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
@@ -72,7 +76,7 @@ export async function orderCompleteHandler(req: Request, res: Response) {
 }
 
 export async function createPaidOrderHandler(req: Request, res: Response) {
-  const { user, amount, discount_code, payment_info } = req.body;
+  const { user, amount, discount_code, payment_info, affiliate } = req.body;
 
   const product_id = req.params.product_id;
   try {
@@ -116,6 +120,29 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
       return res
         .status(500)
         .json({ success: false, message: "an error occurred" });
+    }
+
+    if (affiliate && product.affiliate.can_affiliate) {
+      const affiliateUser = await AffiliateModel.findOne({
+        affiliate_id: affiliate,
+      });
+      if (!affiliateUser) {
+        res
+          .status(400)
+          .json({ success: false, message: "affiliate User not found" });
+        return;
+      }
+
+      const creditAffiliate = await creditAffiliateEarnings({
+        //@ts-ignore
+        user: affiliateUser.user,
+        //@ts-ignore
+        amount: (product?.affiliate?.percent / 100) * amount,
+      });
+
+      affiliateUser.sales += 1;
+
+      await affiliateUser.save();
     }
 
     await Mailer.send("order-confirm", order.user, {

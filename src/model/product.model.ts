@@ -5,14 +5,6 @@ import { User } from "./user.model";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 
-class Affiliate {
-  @prop()
-  public can_affiliate?: boolean;
-
-  @prop({ default: 30 })
-  public percent?: number;
-}
-
 class UserPriced {
   @prop({})
   public user_priced?: boolean;
@@ -74,8 +66,12 @@ export class Product {
   @prop({ required: true, default: 0 })
   price: number;
 
-  @prop({ ref: () => UserPriced })
-  user_priced: Ref<UserPriced>; //
+  @prop({})
+  user_priced: {
+    user_priced?: boolean;
+    min_price?: number;
+    max_price?: number;
+  };
 
   @prop()
   call_to_action: string;
@@ -92,8 +88,11 @@ export class Product {
   @prop({ enum: CurrencyEnum, default: 1 })
   currency: CurrencyEnum;
 
-  @prop({ ref: () => Affiliate })
-  affiliate: Ref<Affiliate>;
+  @prop()
+  affiliate: {
+    can_affiliate?: boolean;
+    percent?: number;
+  };
 
   @prop({ default: false })
   published: boolean;

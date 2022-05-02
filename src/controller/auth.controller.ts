@@ -214,13 +214,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
     success: true,
     token: accessToken,
     expires_in: 10 * 60 * 60 * 1,
-    user: {
-      _id: user._id,
-      email: user.email,
-      username: user.username,
-      full_name: user.full_name,
-      profile_picture: user.profile_picture,
-    },
+    user: user,
   });
 }
 
