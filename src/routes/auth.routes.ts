@@ -7,7 +7,9 @@ import {
   refreshAccessTokenHandler,
   resetPasswordHandler,
   signupUserHandler,
+  updatePasswordHandler,
 } from "../controller/auth.controller";
+import requireUser from "../middleware/requireUser";
 import validateResource from "../middleware/validateResource";
 import { createSessionSchema } from "../schema/auth.schema";
 import { createUserSchema, verifyUserSchema } from "../schema/user.schema";
@@ -31,5 +33,7 @@ router.post("/reset-password", resetPasswordHandler);
 router.post("/api/sessions/refresh", refreshAccessTokenHandler);
 
 router.post("/refresh/token", refreshAccessToken);
+
+router.post("/password/update", requireUser, updatePasswordHandler);
 
 export default router;

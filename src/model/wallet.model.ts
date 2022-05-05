@@ -17,6 +17,12 @@ export class Wallet {
 
   @prop({ default: 0 })
   earnings: number;
+
+  @prop({ default: 0 })
+  affiliate_earnings: number;
+
+  @prop({ default: 0 })
+  affiliate_balance: number;
 }
 
 const WalletModel = getModelForClass(Wallet, {

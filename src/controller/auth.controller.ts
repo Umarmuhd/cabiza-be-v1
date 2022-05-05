@@ -214,13 +214,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
     success: true,
     token: accessToken,
     expires_in: 10 * 60 * 60 * 1,
-    user: {
-      _id: user._id,
-      email: user.email,
-      username: user.username,
-      full_name: user.full_name,
-      profile_picture: user.profile_picture,
-    },
+    user: user,
   });
 }
 
@@ -307,4 +301,34 @@ export async function resetPasswordHandler(req: Request, res: Response) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });
   }
+}
+
+export async function updatePasswordHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const { current_password, new_password } = req.body;
+
+  const user = await UserModel.findById(user_id).select("+password");
+  if (!user) {
+    return res.status(400).json({ success: false, message: "user not found" });
+  }
+
+  if (current_password === new_password) {
+    return res.status(400).json({
+      success: false,
+      message: "current password should not be the same as new password",
+    });
+  }
+
+  const isPasswordMatched = await user.validatePassword(current_password);
+
+  if (!isPasswordMatched) {
+    return res
+      .status(400)
+      .json({ success: false, message: "current password is incorrect" });
+  }
+
+  user.password = new_password;
+  await user.save();
+  res.status(200).json({ success: true, message: "password updated success!" });
 }

@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { nanoid } from "nanoid";
 import { addMinutes, isAfter } from "date-fns";
+import { omit } from "lodash";
 import UserModel from "../model/user.model";
 import WalletModel from "../model/wallet.model";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
@@ -116,7 +117,7 @@ export async function onBoardingHandler(req: Request, res: Response) {
           user.profile_picture = data.Location;
           user.bio = bio;
           user.category = category;
-          user.country = country;
+          user.address.country = country;
 
           await user.save();
 
@@ -130,7 +131,7 @@ export async function onBoardingHandler(req: Request, res: Response) {
     user.profile_picture = `https://avatars.dicebear.com/api/initials/${username}.png`;
     user.bio = bio;
     user.category = category;
-    user.country = country;
+    user.address.country = country;
 
     await user.save();
 
@@ -237,8 +238,34 @@ export async function getUserBalanceHandler(req: Request, res: Response) {
   }
 }
 
-export async function addPaypalHandler(req: Request, res: Response) {
+export async function updateUserProfileHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
+
+  try {
+    let user = await UserModel.findById(user_id).exec();
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user not found" });
+    }
+
+    user = await UserModel.findByIdAndUpdate(user._id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: "paypal payment method added",
+      data: { user },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function addBankAccountHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const { account_name, account_number, bank_code } = req.body;
 
   try {
     const user = await UserModel.findById(user_id).exec();
@@ -249,44 +276,15 @@ export async function addPaypalHandler(req: Request, res: Response) {
         .json({ success: false, message: "user not found" });
     }
 
-    user.paypal.email = req.body.paypal;
+    user.bank_account = { bank_code, account_name, account_number };
 
     await user.save();
 
-    return res.status(200).json({
-      success: true,
-      message: "paypal payment method added",
-      data: { email: req.body.paypal },
-    });
+    return res
+      .status(200)
+      .json({ success: true, message: "bank account saved" });
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });
   }
 }
-
-// export async function addBankAccountHandler(req: Request, res: Response) {
-//   const user_id = res.locals.user._id;
-
-//   const { account_name, account_number, bank_code } = req.body;
-
-//   try {
-//     const user = await UserModel.findById(user_id).exec();
-
-//     if (!user) {
-//       return res
-//         .status(400)
-//         .json({ success: false, message: "user not found" });
-//     }
-
-//     user.bank_account = { bank_code, account_name, account_number };
-
-//     await user.save();
-
-//     return res
-//       .status(200)
-//       .json({ success: true, message: "bank account saved" });
-//   } catch (error: any) {
-//     log.error(error);
-//     return res.status(500).json({ success: false, message: error.message });
-//   }
-// }

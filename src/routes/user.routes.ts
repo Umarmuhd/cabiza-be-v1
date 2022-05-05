@@ -7,12 +7,12 @@ import // forgotPasswordHandler,
 "../controller/user.controller";
 import {
   // addBankAccountHandler,
-  addPaypalHandler,
   connectStripeHandler,
   findUserByUsername,
   getUserBalanceHandler,
   onBoardingHandler,
   updateUserAvatar,
+  updateUserProfileHandler,
 } from "../controller/user.controller";
 import requireUser from "../middleware/requireUser";
 import validateResource from "../middleware/validateResource";
@@ -44,9 +44,7 @@ router.get("/username/:username", findUserByUsername);
 
 router.get("/connect/stripe", requireUser, connectStripeHandler);
 
-router.post("/connect/paypal", requireUser, addPaypalHandler);
-
-// router.post("/connect/bank", requireUser, addBankAccountHandler);
+router.post("/profile", requireUser, updateUserProfileHandler);
 
 // router.post(
 //   "/api/users/forgotpassword",

@@ -6,6 +6,7 @@ import log from "../utils/logger";
 import aws from "../utils/aws";
 import braintree from "../utils/braintree";
 import { findUserByUsername } from "../service/user.service";
+import AffiliateModel from "../model/affiliates.models";
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -29,7 +30,7 @@ export async function updateProductHandler(req: Request, res: Response) {
 
   const product_id = req.params.product_id;
 
-  console.log(req.body);
+  const { user_priced, min_price, max_price } = req.body;
 
   try {
     let product = await ProductModel.findOne({ product_id });
@@ -44,9 +45,6 @@ export async function updateProductHandler(req: Request, res: Response) {
         .status(403)
         .json({ success: false, message: "user unauthorized" });
     }
-
-    const { user_priced, min_price, max_price } = req.body;
-    const user_priced_ = {};
 
     const files = req.files as { [fieldname: string]: Express.Multer.File[] };
 
@@ -100,6 +98,54 @@ export async function updateProductHandler(req: Request, res: Response) {
     res.status(200).json({
       success: true,
       data: { product },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function getUserAffiliatesHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  try {
+    const affiliate = await AffiliateModel.find({ user: user_id })
+      .populate("product")
+      .exec();
+
+    res.status(200).json({
+      success: true,
+      message: "affiliate list",
+      data: { affiliates: affiliate },
+    });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function becomeAffiliateHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const product_id = req.params.product_id;
+
+  try {
+    const product = await ProductModel.findOne({ product_id });
+    if (!product) {
+      res.status(400).json({ success: false, message: "product not found" });
+      return;
+    }
+
+    const affiliate = await AffiliateModel.create({
+      user: user_id,
+      product: product._id,
+      percentage: 0,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Affiliate success!",
+      data: { affiliate },
     });
   } catch (error: any) {
     log.error(error);

@@ -1,10 +1,12 @@
 import express from "express";
 import {
+  becomeAffiliateHandler,
   createNewProductHandler,
   getAllProductsHandler,
   getAllUserPublishedProduct,
   getSingleProductHandle,
   getTokenBrainTree,
+  getUserAffiliatesHandler,
   getUserProductsHandler,
   handleProductPublishing,
   processBrainTreePayment,
@@ -17,6 +19,10 @@ import fileUpload from "../utils/file-upload";
 const router = express.Router();
 
 router.post("/new", requireUser, createNewProductHandler);
+
+router.get("/affiliates", requireUser, getUserAffiliatesHandler);
+
+router.put("/affiliate/:product_id", requireUser, becomeAffiliateHandler);
 
 router.get("/user/:user_id", getUserProductsHandler);
 

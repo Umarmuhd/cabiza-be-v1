@@ -1,8 +1,10 @@
 import express from "express";
 import {
+  createCommentHandler,
   createNewPostHandler,
   deletePostsHandler,
   getAllUserPublishedPosts,
+  getPostCommentsHandler,
   getSinglePostHandler,
   getUserPostsHandler,
   publishingHandler,
@@ -20,6 +22,10 @@ router.post(
   [requireUser, fileUpload.single("attachment")],
   createNewPostHandler
 );
+
+router.post("/create/comment/:post_id", requireUser, createCommentHandler);
+
+router.get("/comments/:post_id", getPostCommentsHandler);
 
 router.patch(
   "/post/:post_id",
