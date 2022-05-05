@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import PostModel from "../model/post.model";
+import CommentModel from "../model/comment.model";
 import { createPost } from "../service/post.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
@@ -111,6 +112,66 @@ export async function updatePostHandler(req: Request, res: Response) {
     return res
       .status(200)
       .json({ success: true, message: "post updated", data: { post } });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function createCommentHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const post_id = req.params.post_id;
+
+  try {
+    const { body } = req.body;
+
+    const post = await PostModel.findOne({ _id: post_id });
+    if (!post) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post not found" });
+    }
+
+    const comment = await CommentModel.create({
+      user: user_id,
+      post: post_id,
+      body,
+      published: true,
+    });
+
+    if (!comment) {
+      res.status(400).json({ success: false, message: "comment not found" });
+      return;
+    }
+
+    return res
+      .status(201)
+      .json({ success: true, message: "comment created", data: { comment } });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }
+}
+
+export async function getPostCommentsHandler(req: Request, res: Response) {
+  const post_id = req.params.post_id;
+
+  try {
+    const post = await PostModel.findOne({ _id: post_id });
+    if (!post) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post not found" });
+    }
+
+    const comments = await CommentModel.find({ post: post._id })
+      .populate("user")
+      .exec();
+
+    return res
+      .status(200)
+      .json({ success: true, message: "comment fetched", data: { comments } });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });

@@ -46,8 +46,6 @@ router.get("/connect/stripe", requireUser, connectStripeHandler);
 
 router.post("/profile", requireUser, updateUserProfileHandler);
 
-// router.post("/connect/bank", requireUser, addBankAccountHandler);
-
 // router.post(
 //   "/api/users/forgotpassword",
 //   validateResource(forgotPasswordSchema),
