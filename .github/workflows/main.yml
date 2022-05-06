@@ -1,8 +1,8 @@
 ---
-name: Build and push cabiza to ecr
+name: Build and push cabiza staging to ecr
 on:
   push:
-    branches: [master]
+    branches: [cabiza-staging]
 jobs:
   build-and-push:
     name: Build and Push to ECR
