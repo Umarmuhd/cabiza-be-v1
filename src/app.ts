@@ -13,9 +13,9 @@ app.use(express.json());
 
 app.use(deserializeUser);
 
-app.use(cors({ origin: 'https://cabiza.net' }));
+app.use(cors({ origin: 'https://www.cabiza.net' }));
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://cabiza.net');
+  res.setHeader('Access-Control-Allow-Origin', 'https://www.cabiza.net');
   res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
