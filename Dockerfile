@@ -22,4 +22,7 @@ RUN npm run build
 
 EXPOSE 3500
 
+ENV AWS_ACCESS_KEY_ID=<YOUR_ACCESS_KEY>
+ENV AWS_SECRET_ACCESS_KEY=<YOUR_SECRET_KEY>
+
 CMD ["node", "build/src/app.js"]
