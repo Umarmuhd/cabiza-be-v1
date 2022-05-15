@@ -47,7 +47,7 @@ export async function signupUserHandler(
 
     return res
       .status(200)
-      .json({ message: 'User created successfully', success: true });
+      .json({ message: 'User created successfully.', success: true });
   } catch (e: any) {
     if (e.code === 11000) {
       return res
@@ -71,13 +71,13 @@ export async function accountActivation(
   if (!user) {
     return res
       .status(400)
-      .json({ message: 'could not verify user', success: false });
+      .json({ message: 'Could not verify user', success: false });
   }
 
   if (user.verified) {
     return res
       .status(400)
-      .json({ message: 'user is already verified', success: false });
+      .json({ message: 'User is already verified', success: false });
   }
 
   if (isAfter(new Date(), new Date(user.activation_code.expires_at!))) {
@@ -114,7 +114,7 @@ export async function loginUserHandler(
   req: Request<{}, {}, CreateSessionInput>,
   res: Response
 ) {
-  const message = 'Invalid email or password';
+  const message = 'Invalid email or password.';
   const { email, password } = req.body;
 
   const user = await findUserByEmail(email);
@@ -239,8 +239,8 @@ export async function forgetPasswordHandler(req: Request, res: Response) {
     user.password_reset = { token, expires_at: addMinutes(new Date(), 15) };
 
     await Mailer.send('forgot-password', user, {
-      resetLink: `https://cabiza.net/auth/reset-password?token=${token}&email=${email}`,
-      subject: 'forget your password',
+      resetLink: `https://www.cabiza.net/auth/reset-password?token=${token}&email=${email}`,
+      subject: 'Forget your password',
     });
 
     await user.save();
@@ -262,7 +262,7 @@ export async function resetPasswordHandler(req: Request, res: Response) {
     if (!token) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide password reset token',
+        message: 'Please provide password reset token.',
       });
     }
 
@@ -271,7 +271,7 @@ export async function resetPasswordHandler(req: Request, res: Response) {
     if (!user) {
       return res
         .status(400)
-        .json({ success: false, message: 'Invalid password reset token' });
+        .json({ success: false, message: 'Invalid password reset token.' });
     }
 
     if (isAfter(new Date(), new Date(user.password_reset.expires_at!))) {
@@ -308,7 +308,7 @@ export async function updatePasswordHandler(req: Request, res: Response) {
 
   const user = await UserModel.findById(user_id).select('+password');
   if (!user) {
-    return res.status(400).json({ success: false, message: 'user not found' });
+    return res.status(400).json({ success: false, message: 'User not found!' });
   }
 
   if (current_password === new_password) {
