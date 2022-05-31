@@ -125,7 +125,7 @@ export async function scheduleUpdateProductHandler(req: Request, res: Response) 
 
 
   try {
-    await cron.schedule(`${dateInSeconds
+    const job = await cron.schedule(`${dateInSeconds
       } ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth} ${dateInDay}`, async () => {
       let product = await ProductModel.findOne({ product_id });
       if (!product) {
