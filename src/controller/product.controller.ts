@@ -124,9 +124,9 @@ export async function scheduleUpdateProductHandler(req: Request, res: Response) 
   const dateInDay = date.getDay();
 
 
-   await cron.schedule(`${dateInSeconds
-    } ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth} ${dateInDay}`, async () => {
-    try {
+  try {
+    await cron.schedule(`${dateInSeconds
+      } ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth} ${dateInDay}`, async () => {
       let product = await ProductModel.findOne({ product_id });
       if (!product) {
         return res
@@ -193,11 +193,11 @@ export async function scheduleUpdateProductHandler(req: Request, res: Response) 
         success: true,
         data: { product },
       });
-    } catch (error: any) {
-      log.error(error);
-      return res.status(409).json({ success: false, message: error.message });
-    }
-    });  
+      });      
+  } catch (error: any) {
+    log.error(error);
+    return res.status(409).json({ success: false, message: error.message });
+  }   
 }
 
 export async function getUserAffiliatesHandler(req: Request, res: Response) {
