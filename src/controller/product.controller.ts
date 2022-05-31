@@ -8,6 +8,8 @@ import braintree from "../utils/braintree";
 import { findUserByUsername } from "../service/user.service";
 import AffiliateModel from "../model/affiliates.models";
 
+var cron = require('node-cron');
+
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
@@ -103,6 +105,99 @@ export async function updateProductHandler(req: Request, res: Response) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
   }
+}
+
+export async function scheduleUpdateProductHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  const product_id = req.params.product_id;
+
+  const { user_priced, min_price, max_price } = req.body;
+
+  const date = req.body.date
+
+  const dateInSeconds = date.getSeconds();
+  const dateInMinutes = date.getMinutes();
+  const dateInHours = date.getHours();
+  const dateInDate = date.getDate()
+  const dateInMonth = date.getMonth();
+  const dateInDay = date.getDay();
+
+
+   await cron.schedule(`${dateInSeconds
+    } ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth} ${dateInDay}`, async () => {
+    try {
+      let product = await ProductModel.findOne({ product_id });
+      if (!product) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Product not found" });
+      }
+
+      if (product.user?.toString() !== user_id) {
+        return res
+          .status(403)
+          .json({ success: false, message: "user unauthorized" });
+      }
+
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
+      if (files["thumbnail"]) {
+        const thumbnail = files["thumbnail"][0];
+
+        const params = {
+          Bucket: "cabizacore",
+          ACL: "public-read",
+          Key: `products/${product_id}/${thumbnail.filename}`,
+          Body: fs.readFileSync(thumbnail.path),
+        };
+
+        const stored = await aws.upload(params).promise();
+        req.body.thumbnail = stored.Location;
+      }
+
+      if (files["cover_image"]) {
+        const cover_image = files["cover_image"][0];
+
+        const params = {
+          Bucket: "cabizacore",
+          ACL: "public-read",
+          Key: `products/${product_id}/${cover_image.filename}`,
+          Body: fs.readFileSync(cover_image.path),
+        };
+
+        const stored = await aws.upload(params).promise();
+        req.body.cover_image = stored.Location;
+      }
+
+      if (files["file"]) {
+        const file = files["file"][0];
+
+        const params = {
+          Bucket: "cabizacore",
+          ACL: "public-read",
+          Key: `products/${product_id}/${file.filename}`,
+          Body: fs.readFileSync(file.path),
+        };
+
+        const stored = await aws.upload(params).promise();
+        req.body.file = stored.Location;
+      }
+
+      product = await ProductModel.findByIdAndUpdate(product._id, req.body, {
+        new: true,
+        useFindAndModify: false,
+      });
+
+      res.status(200).json({
+        success: true,
+        data: { product },
+      });
+    } catch (error: any) {
+      log.error(error);
+      return res.status(409).json({ success: false, message: error.message });
+    }
+    });  
 }
 
 export async function getUserAffiliatesHandler(req: Request, res: Response) {
