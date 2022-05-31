@@ -46,7 +46,7 @@ router.post(
   updateProductHandler
 );
 
-router.put("/schedule-new/publishing/:post_id", [requireUser, fileUpload.fields([
+router.put("/schedule-new/product/:product_id", [requireUser, fileUpload.fields([
   { name: "thumbnail", maxCount: 1 },
   { name: "cover", maxCount: 1 },
   { name: "file", maxCount: 1 },
