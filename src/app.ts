@@ -6,6 +6,7 @@ import connectToDb from './utils/connectToDb';
 import log from './utils/logger';
 import router from './routes';
 import deserializeUser from './middleware/deserializeUser';
+import { CORS_ORIGIN } from './constants';
 
 const app = express();
 
@@ -13,9 +14,10 @@ app.use(express.json());
 
 app.use(deserializeUser);
 
-app.use(cors({ origin: 'https://www.cabiza.net' }));
+app.use(cors({ origin: CORS_ORIGIN }));
+
 app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', 'https://www.cabiza.net');
+  res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
   res.setHeader(
     'Access-Control-Allow-Headers',
     'Origin, X-Requested-With, Content-Type, Accept, Authorization'
