@@ -174,11 +174,11 @@ export async function getAllProductsHandler(req: Request, res: Response) {
       .populate("user", "full_name profile_picture category username")
       .exec();
 
-    if (products) {
-      return res
-        .status(200)
-        .json({ success: true, message: "products list", data: { products } });
-    }
+    return res.status(200).json({
+      success: true,
+      message: "products list",
+      data: { products: products },
+    });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
