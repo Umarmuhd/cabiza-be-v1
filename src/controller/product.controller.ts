@@ -197,6 +197,11 @@ export function scheduleUpdateProductHandler(req: Request, res: Response) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
   }   
+
+  res.status(200).json({
+    success: true,
+    message: "Product successfully scheduled"
+  });
 }
 
 export async function getUserAffiliatesHandler(req: Request, res: Response) {
