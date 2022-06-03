@@ -107,14 +107,14 @@ export async function updateProductHandler(req: Request, res: Response) {
   }
 }
 
-export async function scheduleUpdateProductHandler(req: Request, res: Response) {
+export function scheduleUpdateProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
   const product_id = req.params.product_id;
 
   const { user_priced, min_price, max_price } = req.body;
 
-  const date = req.body.date
+  const date = new Date(req.body.date)
 
   const dateInSeconds = date.getSeconds();
   const dateInMinutes = date.getMinutes();
@@ -125,8 +125,7 @@ export async function scheduleUpdateProductHandler(req: Request, res: Response) 
 
 
   try {
-    const job = await cron.schedule(`${dateInSeconds
-      } ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth} ${dateInDay}`, async () => {
+    cron.schedule(`${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth + 1} ${dateInDay}`, async () => {
       let product = await ProductModel.findOne({ product_id });
       if (!product) {
         return res
@@ -198,6 +197,11 @@ export async function scheduleUpdateProductHandler(req: Request, res: Response) 
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
   }   
+
+  res.status(200).json({
+    success: true,
+    message: "Product successfully scheduled"
+  });
 }
 
 export async function getUserAffiliatesHandler(req: Request, res: Response) {
