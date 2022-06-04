@@ -107,7 +107,7 @@ export async function updateProductHandler(req: Request, res: Response) {
   }
 }
 
-export function scheduleUpdateProductHandler(req: Request, res: Response) {
+export async function scheduleUpdateProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
   const product_id = req.params.product_id;
@@ -123,10 +123,14 @@ export function scheduleUpdateProductHandler(req: Request, res: Response) {
   const dateInMonth = date.getMonth();
   const dateInDay = date.getDay();
 
+  let product = await ProductModel.findOne({ product_id });
+  await ProductModel.findByIdAndUpdate(product?._id, { ...req.body, scheduled: true, published: false }, {
+    new: true,
+    useFindAndModify: false,
+  })
 
-  try {
+  try {    
     cron.schedule(`${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth + 1} ${dateInDay}`, async () => {
-      let product = await ProductModel.findOne({ product_id });
       if (!product) {
         return res
           .status(400)
@@ -183,7 +187,7 @@ export function scheduleUpdateProductHandler(req: Request, res: Response) {
         req.body.file = stored.Location;
       }
 
-      product = await ProductModel.findByIdAndUpdate(product._id, req.body, {
+      product = await ProductModel.findByIdAndUpdate(product._id, {...req.body, scheduled: true, published: true}, {
         new: true,
         useFindAndModify: false,
       });
