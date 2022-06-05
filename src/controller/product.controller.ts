@@ -107,7 +107,7 @@ export async function updateProductHandler(req: Request, res: Response) {
   }
 }
 
-export async function scheduleUpdateProductHandler(req: Request, res: Response) {
+export function scheduleUpdateProductHandler(req: Request, res: Response) {
   res.status(200).json({
     success: true,
     message: "Product successfully scheduled"
