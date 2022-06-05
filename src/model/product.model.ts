@@ -79,6 +79,9 @@ export class Product {
   @prop()
   contains_physical: boolean;
 
+  @prop()
+  scheduledTime: Date;
+
   @prop({ enum: CategoriesEnum, default: 0 })
   categories: CategoriesEnum;
 
