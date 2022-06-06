@@ -8,7 +8,7 @@ import braintree from "../utils/braintree";
 import { findUserByUsername } from "../service/user.service";
 import AffiliateModel from "../model/affiliates.models";
 
-var cron = require('node-cron');
+var cron = require("node-cron");
 
 export async function createNewProductHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
@@ -107,104 +107,122 @@ export async function updateProductHandler(req: Request, res: Response) {
   }
 }
 
-export async function scheduleUpdateProductHandler(req: Request, res: Response) {
+export async function scheduleUpdateProductHandler(
+  req: Request,
+  res: Response
+) {
   const user_id = res.locals.user._id;
 
   const product_id = req.params.product_id;
 
   const { user_priced, min_price, max_price } = req.body;
 
-  const date = new Date(req.body.date)
+  const date = new Date(req.body.date);
 
   const dateInSeconds = date.getSeconds();
   const dateInMinutes = date.getMinutes();
   const dateInHours = date.getHours();
-  const dateInDate = date.getDate()
+  const dateInDate = date.getDate();
   const dateInMonth = date.getMonth();
   const dateInDay = date.getDay();
 
   let product = await ProductModel.findOne({ product_id });
-  await ProductModel.findByIdAndUpdate(product?._id, { ...req.body, scheduled: true, published: false }, {
-    new: true,
-    useFindAndModify: false,
-  })
+  await ProductModel.findByIdAndUpdate(
+    product?._id,
+    { ...req.body, scheduled: true, published: false },
+    {
+      new: true,
+      useFindAndModify: false,
+    }
+  );
 
   try {
-    cron.schedule(`${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth + 1} ${dateInDay}`, async () => {
-      if (!product) {
-        return res
-          .status(400)
-          .json({ success: false, message: "Product not found" });
-      }
+    cron.schedule(
+      `${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${
+        dateInMonth + 1
+      } ${dateInDay}`,
+      async () => {
+        if (!product) {
+          return res
+            .status(400)
+            .json({ success: false, message: "Product not found" });
+        }
 
-      if (product.user?.toString() !== user_id) {
-        return res
-          .status(403)
-          .json({ success: false, message: "user unauthorized" });
-      }
+        if (product.user?.toString() !== user_id) {
+          return res
+            .status(403)
+            .json({ success: false, message: "user unauthorized" });
+        }
 
-      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-
-      if (files["thumbnail"]) {
-        const thumbnail = files["thumbnail"][0];
-
-        const params = {
-          Bucket: "cabizacore",
-          ACL: "public-read",
-          Key: `products/${product_id}/${thumbnail.filename}`,
-          Body: fs.readFileSync(thumbnail.path),
+        const files = req.files as {
+          [fieldname: string]: Express.Multer.File[];
         };
 
-        const stored = await aws.upload(params).promise();
-        req.body.thumbnail = stored.Location;
+        if (files["thumbnail"]) {
+          const thumbnail = files["thumbnail"][0];
+
+          const params = {
+            Bucket: "cabizacore",
+            ACL: "public-read",
+            Key: `products/${product_id}/${thumbnail.filename}`,
+            Body: fs.readFileSync(thumbnail.path),
+          };
+
+          const stored = await aws.upload(params).promise();
+          req.body.thumbnail = stored.Location;
+        }
+
+        if (files["cover_image"]) {
+          const cover_image = files["cover_image"][0];
+
+          const params = {
+            Bucket: "cabizacore",
+            ACL: "public-read",
+            Key: `products/${product_id}/${cover_image.filename}`,
+            Body: fs.readFileSync(cover_image.path),
+          };
+
+          const stored = await aws.upload(params).promise();
+          req.body.cover_image = stored.Location;
+        }
+
+        if (files["file"]) {
+          const file = files["file"][0];
+
+          const params = {
+            Bucket: "cabizacore",
+            ACL: "public-read",
+            Key: `products/${product_id}/${file.filename}`,
+            Body: fs.readFileSync(file.path),
+          };
+
+          const stored = await aws.upload(params).promise();
+          req.body.file = stored.Location;
+        }
+
+        product = await ProductModel.findByIdAndUpdate(
+          product._id,
+          { ...req.body, scheduled: true, published: true },
+          {
+            new: true,
+            useFindAndModify: false,
+          }
+        );
+
+        res.status(200).json({
+          success: true,
+          data: { product },
+        });
       }
-
-      if (files["cover_image"]) {
-        const cover_image = files["cover_image"][0];
-
-        const params = {
-          Bucket: "cabizacore",
-          ACL: "public-read",
-          Key: `products/${product_id}/${cover_image.filename}`,
-          Body: fs.readFileSync(cover_image.path),
-        };
-
-        const stored = await aws.upload(params).promise();
-        req.body.cover_image = stored.Location;
-      }
-
-      if (files["file"]) {
-        const file = files["file"][0];
-
-        const params = {
-          Bucket: "cabizacore",
-          ACL: "public-read",
-          Key: `products/${product_id}/${file.filename}`,
-          Body: fs.readFileSync(file.path),
-        };
-
-        const stored = await aws.upload(params).promise();
-        req.body.file = stored.Location;
-      }
-
-      product = await ProductModel.findByIdAndUpdate(product._id, { ...req.body, scheduled: true, published: true }, {
-        new: true,
-        useFindAndModify: false,
-      });
-
-      res.status(200).json({
-        success: true,
-        data: { product },
-      });
-    });
+    );
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
-  }   
-  
+  }
+
   res.status(200).json({
     success: true,
-    message: "Product successfully scheduled"
+    message: "Product successfully scheduled",
   });
 }
 
@@ -234,8 +252,21 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
 
   try {
     const product = await ProductModel.findOne({ product_id });
+
     if (!product) {
       res.status(400).json({ success: false, message: "product not found" });
+      return;
+    }
+
+    const existing_aff = await AffiliateModel.findOne({
+      product: product._id,
+      user: user_id,
+    });
+
+    if (existing_aff) {
+      res
+        .status(400)
+        .json({ success: false, message: "user is already affiliated" });
       return;
     }
 
@@ -247,12 +278,12 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
 
     res.status(200).json({
       success: true,
-      message: "Affiliate success!",
+      message: "affiliate success!",
       data: { affiliate },
     });
   } catch (error: any) {
     log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
 
