@@ -8,15 +8,37 @@ import connectToDb from "./utils/connectToDb";
 import log from "./utils/logger";
 import router from "./routes";
 import deserializeUser from "./middleware/deserializeUser";
-import { CORS_ORIGIN } from "./constants";
+import { CORS_ORIGIN, CORS_ORIGIN_2 } from "./constants";
 
 const app = express();
 
+app.use(cookieParser());
 app.use(express.json());
 
 app.use(deserializeUser);
 
-app.use(cors({ origin: CORS_ORIGIN }));
+app.use((req, res, next) => {
+  console.log(req.headers);
+  return next();
+});
+
+const whitelist = [CORS_ORIGIN, CORS_ORIGIN_2];
+const corsOptions: cors.CorsOptions = {
+  origin: function (origin, callback) {
+    console.log(whitelist.indexOf(origin as string));
+
+    callback(null, true);
+
+    // if (whitelist.indexOf(origin as string) !== -1) {
+    //   callback(null, true);
+    // } else {
+    //   callback(new Error("Not allowed by CORS"));
+    // }
+  },
+};
+
+app.use(cors(corsOptions));
+app.use(helmet());
 
 app.use(router);
 

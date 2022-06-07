@@ -266,7 +266,7 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
     if (existing_aff) {
       res
         .status(400)
-        .json({ success: false, message: "user is already affiliated" });
+        .json({ success: false, message: "User is already affiliated" });
       return;
     }
 
