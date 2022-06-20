@@ -79,9 +79,9 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
   const { user, amount, discount_code, payment_info, affiliate } = req.body;
 
   const product_id = req.params.product_id;
+
   try {
     const product = await ProductModel.findOne({ product_id });
-
     if (!product) {
       return res
         .status(400)
@@ -93,9 +93,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
     });
 
     if (existing_order) {
-      return res
-        .status(409)
-        .json({ success: false, message: "Order already exists" });
+      res.status(409).json({ success: false, message: "Order already exists" });
+      return;
     }
 
     const order = await createOrder({
@@ -109,9 +108,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
     });
 
     if (!order) {
-      return res
-        .status(400)
-        .json({ success: false, message: "can't create order" });
+      res.status(400).json({ success: false, message: "can't create order" });
+      return;
     }
 
     const credit = await creditEarningsBalance({ amount, user: product.user });
@@ -132,6 +130,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
           .json({ success: false, message: "affiliate User not found" });
         return;
       }
+
+      order.referrer = affiliateUser.user;
 
       const creditAffiliate = await creditAffiliateEarnings({
         //@ts-ignore

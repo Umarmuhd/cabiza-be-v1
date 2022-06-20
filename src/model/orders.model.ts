@@ -1,6 +1,7 @@
 import { getModelForClass, prop, Ref } from "@typegoose/typegoose";
 import { customAlphabet } from "nanoid";
 import { Product } from "./product.model";
+import { User } from "./user.model";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 
@@ -40,6 +41,9 @@ export class Order {
 
   @prop({ default: "processing" })
   status: string;
+
+  @prop({ ref: () => User })
+  referrer: Ref<User>;
 }
 
 const OrderModel = getModelForClass(Order, {
