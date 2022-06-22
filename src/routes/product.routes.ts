@@ -11,6 +11,7 @@ import {
   handleProductPublishing,
   processBrainTreePayment,
   updateProductHandler,
+  scheduleUpdateProductHandler
 } from "../controller/product.controller";
 
 import requireUser from "../middleware/requireUser";
@@ -44,6 +45,18 @@ router.post(
   ],
   updateProductHandler
 );
+
+router.patch(
+  "/schedule-new/product/:product_id", 
+  // [
+  //   requireUser,
+  //   fileUpload.fields([
+  //     { name: "thumbnail", maxCount: 1 },
+  //     { name: "cover_image", maxCount: 1 },
+  //     { name: "file", maxCount: 1 },
+  //   ]),
+  // ],
+  scheduleUpdateProductHandler);
 
 router.get("/braintree/gettoken/:user_id", getTokenBrainTree);
 
