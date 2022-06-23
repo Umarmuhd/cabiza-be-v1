@@ -228,7 +228,6 @@ export async function refreshAccessToken(req: Request, res: Response) {
 export async function forgetPasswordHandler(req: Request, res: Response) {
   try {
     const email = req.body.email;
-
     if (!email) {
       return res
         .status(400)
@@ -236,7 +235,6 @@ export async function forgetPasswordHandler(req: Request, res: Response) {
     }
 
     const user = await UserModel.findOne({ email });
-
     if (!user) {
       return res
         .status(404)
@@ -276,7 +274,6 @@ export async function resetPasswordHandler(req: Request, res: Response) {
     }
 
     const user = await UserModel.findOne({ email });
-
     if (!user) {
       return res
         .status(400)
