@@ -1,14 +1,3 @@
-<<<<<<< HEAD
-require('dotenv').config();
-import express from 'express';
-import config from 'config';
-import cors from 'cors';
-import connectToDb from './utils/connectToDb';
-import log from './utils/logger';
-import router from './routes';
-import deserializeUser from './middleware/deserializeUser';
-import { CORS_ORIGIN } from './constants';
-=======
 require("dotenv").config();
 import express, { Request } from "express";
 import config from "config";
@@ -20,7 +9,6 @@ import log from "./utils/logger";
 import router from "./routes";
 import deserializeUser from "./middleware/deserializeUser";
 import { CORS_ORIGIN, CORS_ORIGIN_2 } from "./constants";
->>>>>>> 7e5db27269ca19761008f88261182ffbc85ee5e2
 
 const app = express();
 
@@ -29,20 +17,6 @@ app.use(express.json());
 
 app.use(deserializeUser);
 
-<<<<<<< HEAD
-app.use(cors({ origin: CORS_ORIGIN }));
-
-app.use((req, res, next) => {
-  res.setHeader('Access-Control-Allow-Origin', CORS_ORIGIN);
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Origin, X-Requested-With, Content-Type, Accept, Authorization'
-  );
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE');
-
-  next();
-});
-=======
 // const whitelist = ['http://developer1.com', 'http://developer2.com']
 // const corsOptions = {
 //   origin: (origin, callback) => {
@@ -67,7 +41,6 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(helmet());
->>>>>>> 7e5db27269ca19761008f88261182ffbc85ee5e2
 
 app.use(router);
 
