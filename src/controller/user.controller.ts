@@ -265,7 +265,7 @@ export async function updateUserProfileHandler(req: Request, res: Response) {
 export async function addBankAccountHandler(req: Request, res: Response) {
   const user_id = res.locals.user._id;
 
-  const { account_name, account_number, bank_code } = req.body;
+  const { account_name, account_number, bank_code, bank_name } = req.body;
 
   try {
     const user = await UserModel.findById(user_id).exec();
@@ -276,7 +276,7 @@ export async function addBankAccountHandler(req: Request, res: Response) {
         .json({ success: false, message: "user not found" });
     }
 
-    user.bank_account = { bank_code, account_name, account_number };
+    user.bank_account = { bank_code, account_name, account_number, bank_name };
 
     await user.save();
 
