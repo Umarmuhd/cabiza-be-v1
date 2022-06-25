@@ -225,9 +225,8 @@ export async function getUserBalanceHandler(req: Request, res: Response) {
     const wallet = await WalletModel.findOne({ user: user_id });
 
     if (!wallet) {
-      return res
-        .status(500)
-        .json({ success: false, message: "something went wrong" });
+      res.status(500).json({ success: false, message: "Something went wrong" });
+      return;
     }
 
     return res.status(200).json({
