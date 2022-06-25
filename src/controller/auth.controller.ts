@@ -137,15 +137,6 @@ export async function loginUserHandler(
 
   const accessToken = signAccessToken(user);
 
-  res.cookie("accessToken", accessToken, {
-    maxAge: 1800000, // 1 year
-    httpOnly: true,
-    domain: "localhost",
-    path: "/",
-    sameSite: "strict",
-    secure: false,
-  });
-
   const refreshToken = await signRefreshToken({ userId: user._id });
 
   return res.status(200).json({
@@ -156,42 +147,12 @@ export async function loginUserHandler(
   });
 }
 
-export async function refreshAccessTokenHandler(req: Request, res: Response) {
-  const refreshToken = get(req, "headers.x-refresh");
-
-  const decoded = verifyJwt<{ session: string }>(
-    refreshToken,
-    "refreshTokenPublicKey"
-  );
-
-  if (!decoded) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const session = await findSessionById(decoded.session);
-
-  if (!session || !session.valid) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const user = await findUserById(String(session.user));
-
-  if (!user) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const accessToken = signAccessToken(user);
-
-  return res.send({ accessToken });
-}
-
 export async function refreshAccessToken(req: Request, res: Response) {
   const refreshToken = req.body.token;
 
   if (!refreshToken) {
-    return res
-      .status(400)
-      .json({ success: false, message: "invalid refresh token" });
+    res.status(400).json({ success: false, message: "Invalid refresh token" });
+    return;
   }
 
   const decoded = verifyJwt<{ session: string }>(
@@ -200,7 +161,10 @@ export async function refreshAccessToken(req: Request, res: Response) {
   );
 
   if (!decoded) {
-    return res.status(401).send("Could not refresh access token");
+    res
+      .status(401)
+      .json({ success: false, message: "Could not refresh access token" });
+    return;
   }
 
   const session = await findSessionById(decoded.session);
@@ -217,9 +181,12 @@ export async function refreshAccessToken(req: Request, res: Response) {
 
   const accessToken = signAccessToken(user);
 
+  const refresh_token = await signRefreshToken({ userId: user._id });
+
   return res.status(200).json({
     success: true,
-    token: accessToken,
+    accessToken: accessToken,
+    refreshToken: refresh_token,
     expires_in: 10 * 60 * 60 * 1,
     user: user,
   });

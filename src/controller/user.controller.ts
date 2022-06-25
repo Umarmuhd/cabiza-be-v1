@@ -69,7 +69,10 @@ export async function updateUserAvatar(req: Request, res: Response) {
 }
 
 export async function getCurrentUserHandler(req: Request, res: Response) {
-  return res.send(res.locals.user);
+  res
+    .status(200)
+    .json({ success: true, message: "user data", user: res.locals.user });
+  return;
 }
 
 export async function onBoardingHandler(req: Request, res: Response) {

@@ -4,7 +4,6 @@ import {
   forgetPasswordHandler,
   loginUserHandler,
   refreshAccessToken,
-  refreshAccessTokenHandler,
   resetPasswordHandler,
   signupUserHandler,
   updatePasswordHandler,
@@ -29,8 +28,6 @@ router.post(
 router.post("/forget-password", forgetPasswordHandler);
 
 router.post("/reset-password", resetPasswordHandler);
-
-router.post("/api/sessions/refresh", refreshAccessTokenHandler);
 
 router.post("/refresh/token", refreshAccessToken);
 

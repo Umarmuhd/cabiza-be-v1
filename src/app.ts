@@ -36,7 +36,7 @@ app.use(deserializeUser);
 // }
 
 const corsOptions: cors.CorsOptions = {
-  origin: [CORS_ORIGIN, CORS_ORIGIN_2],
+  origin: "*",
 };
 
 app.use(cors(corsOptions));
