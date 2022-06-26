@@ -134,7 +134,7 @@ export async function onBoardingHandler(req: Request, res: Response) {
     user.profile_picture = `https://avatars.dicebear.com/api/initials/${username}.png`;
     user.bio = bio;
     user.category = category;
-    user.address.country = country;
+    user.address = { country };
 
     await user.save();
 

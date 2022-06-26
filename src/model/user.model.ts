@@ -71,10 +71,10 @@ export class User {
 
   @prop()
   address: {
-    street_name: string;
-    postal_code: string;
-    city: string;
-    country: string;
+    street_name?: string;
+    postal_code?: string;
+    city?: string;
+    country?: string;
   };
 
   @prop({})
