@@ -7,6 +7,8 @@ import aws from "../utils/aws";
 import braintree from "../utils/braintree";
 import { findUserByUsername } from "../service/user.service";
 import AffiliateModel from "../model/affiliates.models";
+import OrderModel from "../model/orders.model";
+const ObjectId = require("mongoose").Types.ObjectId;
 
 var cron = require("node-cron");
 
@@ -291,11 +293,59 @@ export async function getUserProductsHandler(req: Request, res: Response) {
   const user_id = req.params.user_id;
 
   try {
+    const orders = await OrderModel.aggregate([
+      {
+        $match: { product_owner: ObjectId(user_id) },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "product",
+          foreignField: "_id",
+          as: "products",
+        },
+      },
+      {
+        $unwind: {
+          path: "$products",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $group: {
+          _id: "$products._id",
+          total: {
+            $sum: "$final_price",
+          },
+          sales: {
+            $count: {},
+          },
+          product_id: {
+            $first: "$products.product_id",
+          },
+          thumbnail: {
+            $first: "$products.thumbnail",
+          },
+          price: {
+            $first: "$products.price",
+          },
+          name: {
+            $first: "$products.name",
+          },
+        },
+      },
+    ]);
+
     const products = await ProductModel.find({ user: user_id });
 
-    return res
-      .status(200)
-      .json({ success: true, message: "product list", data: { products } });
+    var ids = new Set(orders.map((d) => d.product_id));
+    var merged = [...orders, ...products.filter((d) => !ids.has(d.product_id))];
+
+    return res.status(200).json({
+      success: true,
+      message: "product list",
+      data: { products: merged },
+    });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });

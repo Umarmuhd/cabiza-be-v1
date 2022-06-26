@@ -187,7 +187,7 @@ export async function refreshAccessToken(req: Request, res: Response) {
     success: true,
     accessToken: accessToken,
     refreshToken: refresh_token,
-    expires_in: 10 * 60 * 60 * 1,
+    expiresIn: 60 * 30 * 1,
     user: user,
   });
 }
