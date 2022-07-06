@@ -1,5 +1,5 @@
 require("dotenv").config();
-import express, { Request } from "express";
+import express from "express";
 import config from "config";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
@@ -35,9 +35,7 @@ app.use(deserializeUser);
 //   }
 // }
 
-const corsOptions: cors.CorsOptions = {
-  origin: [CORS_ORIGIN, CORS_ORIGIN_2],
-};
+const corsOptions: cors.CorsOptions = { origin: "*" };
 
 app.use(cors(corsOptions));
 app.use(helmet());

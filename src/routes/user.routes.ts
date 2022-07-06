@@ -9,6 +9,7 @@ import {
   // addBankAccountHandler,
   connectStripeHandler,
   findUserByUsername,
+  getCurrentUserHandler,
   getUserBalanceHandler,
   onBoardingHandler,
   updateUserAvatar,
@@ -58,6 +59,6 @@ router.post("/profile", requireUser, updateUserProfileHandler);
 //   resetPasswordHandler
 // );
 
-// router.get("/api/users/me", requireUser, getCurrentUserHandler);
+router.get("/me", requireUser, getCurrentUserHandler);
 
 export default router;

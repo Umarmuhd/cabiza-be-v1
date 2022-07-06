@@ -27,7 +27,7 @@ export async function signupUserHandler(
   const { full_name, email, password, referral_Id } = req.body;
 
   try {
-    const user = await createUser({...req.body, refree:referral_Id });
+    const user = await createUser({ ...req.body, refree: referral_Id });
     user.activation_code = {
       token: nanoid(),
       expires_at: addMinutes(new Date(), 15),
@@ -155,42 +155,12 @@ export async function loginUserHandler(
   });
 }
 
-export async function refreshAccessTokenHandler(req: Request, res: Response) {
-  const refreshToken = get(req, "headers.x-refresh");
-
-  const decoded = verifyJwt<{ session: string }>(
-    refreshToken,
-    "refreshTokenPublicKey"
-  );
-
-  if (!decoded) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const session = await findSessionById(decoded.session);
-
-  if (!session || !session.valid) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const user = await findUserById(String(session.user));
-
-  if (!user) {
-    return res.status(401).send("Could not refresh access token");
-  }
-
-  const accessToken = signAccessToken(user);
-
-  return res.send({ accessToken });
-}
-
 export async function refreshAccessToken(req: Request, res: Response) {
   const refreshToken = req.body.token;
 
   if (!refreshToken) {
-    return res
-      .status(400)
-      .json({ success: false, message: "invalid refresh token" });
+    res.status(400).json({ success: false, message: "Invalid refresh token" });
+    return;
   }
 
   const decoded = verifyJwt<{ session: string }>(
@@ -199,7 +169,14 @@ export async function refreshAccessToken(req: Request, res: Response) {
   );
 
   if (!decoded) {
+<<<<<<< HEAD
+    res
+      .status(401)
+      .json({ success: false, message: "Could not refresh access token" });
+    return;
+=======
     return res.status(401).send("Could not refresh access token");
+>>>>>>> 94ed2736c44c2a3f33f4e1b1eb8c4f8cb5ac4dca
   }
 
   const session = await findSessionById(decoded.session);
@@ -216,10 +193,13 @@ export async function refreshAccessToken(req: Request, res: Response) {
 
   const accessToken = signAccessToken(user);
 
+  const refresh_token = await signRefreshToken({ userId: user._id });
+
   return res.status(200).json({
     success: true,
-    token: accessToken,
-    expires_in: 10 * 60 * 60 * 1,
+    accessToken: accessToken,
+    refreshToken: refresh_token,
+    expiresIn: 60 * 30 * 1,
     user: user,
   });
 }

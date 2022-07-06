@@ -69,7 +69,10 @@ export async function updateUserAvatar(req: Request, res: Response) {
 }
 
 export async function getCurrentUserHandler(req: Request, res: Response) {
-  return res.send(res.locals.user);
+  res
+    .status(200)
+    .json({ success: true, message: "user data", user: res.locals.user });
+  return;
 }
 
 export async function onBoardingHandler(req: Request, res: Response) {
@@ -131,7 +134,7 @@ export async function onBoardingHandler(req: Request, res: Response) {
     user.profile_picture = `https://avatars.dicebear.com/api/initials/${username}.png`;
     user.bio = bio;
     user.category = category;
-    user.address.country = country;
+    user.address = { country };
 
     await user.save();
 
@@ -222,9 +225,8 @@ export async function getUserBalanceHandler(req: Request, res: Response) {
     const wallet = await WalletModel.findOne({ user: user_id });
 
     if (!wallet) {
-      return res
-        .status(500)
-        .json({ success: false, message: "something went wrong" });
+      res.status(500).json({ success: false, message: "Something went wrong" });
+      return;
     }
 
     return res.status(200).json({

@@ -105,6 +105,7 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
       product: product._id,
       payment_id: payment_info.payment_id,
       payment_method: payment_info.payment_method,
+      product_owner: product.user,
     });
 
     if (!order) {
