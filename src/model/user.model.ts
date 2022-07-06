@@ -11,6 +11,11 @@ import {
 import bcrypt from "bcrypt";
 import log from "../utils/logger";
 
+import { customAlphabet } from 'nanoid';
+
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10);
+
+
 export const privateFields = [
   "password",
   "__v",
@@ -79,9 +84,14 @@ export class User {
 
   @prop({})
   birthday: string;
+  
+  @prop({ required: true, unique: true, default: () => `referral_${nanoid()}` })
+  referral_code: string;
 
   @prop({})
   bvn: string;
+  @prop({})
+  refree: string;
 
   @prop({ required: true })
   password: string;

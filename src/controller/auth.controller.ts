@@ -21,14 +21,13 @@ import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
 export async function signupUserHandler(
-  req: Request<{}, {}, CreateUserInput>,
+  req: Request<{}, {}>,
   res: Response
 ) {
-  const { full_name, email, password } = req.body;
+  const { full_name, email, password, referral_Id } = req.body;
 
   try {
-    const user = await createUser({ full_name, email, password });
-
+    const user = await createUser({ ...req.body, refree: referral_Id });
     user.activation_code = {
       token: nanoid(),
       expires_at: addMinutes(new Date(), 15),
@@ -137,6 +136,15 @@ export async function loginUserHandler(
 
   const accessToken = signAccessToken(user);
 
+  res.cookie("accessToken", accessToken, {
+    maxAge: 1800000, // 1 year
+    httpOnly: true,
+    domain: "localhost",
+    path: "/",
+    sameSite: "strict",
+    secure: false,
+  });
+
   const refreshToken = await signRefreshToken({ userId: user._id });
 
   return res.status(200).json({
@@ -161,10 +169,14 @@ export async function refreshAccessToken(req: Request, res: Response) {
   );
 
   if (!decoded) {
+<<<<<<< HEAD
     res
       .status(401)
       .json({ success: false, message: "Could not refresh access token" });
     return;
+=======
+    return res.status(401).send("Could not refresh access token");
+>>>>>>> 94ed2736c44c2a3f33f4e1b1eb8c4f8cb5ac4dca
   }
 
   const session = await findSessionById(decoded.session);

@@ -5,6 +5,7 @@ export const createUserSchema = object({
     full_name: string({
       required_error: "Full name is required",
     }),
+  
     password: string({
       required_error: "Password is required",
     }).min(6, "Password is too short - should be min 6 chars"),
