@@ -169,14 +169,10 @@ export async function refreshAccessToken(req: Request, res: Response) {
   );
 
   if (!decoded) {
-<<<<<<< HEAD
     res
       .status(401)
       .json({ success: false, message: "Could not refresh access token" });
     return;
-=======
-    return res.status(401).send("Could not refresh access token");
->>>>>>> 94ed2736c44c2a3f33f4e1b1eb8c4f8cb5ac4dca
   }
 
   const session = await findSessionById(decoded.session);
