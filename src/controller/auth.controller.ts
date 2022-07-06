@@ -21,14 +21,13 @@ import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
 export async function signupUserHandler(
-  req: Request<{}, {}, CreateUserInput>,
+  req: Request<{}, {}>,
   res: Response
 ) {
-  const { full_name, email, password } = req.body;
+  const { full_name, email, password, referral_Id } = req.body;
 
   try {
-    const user = await createUser({ full_name, email, password });
-
+    const user = await createUser({...req.body, refree:referral_Id });
     user.activation_code = {
       token: nanoid(),
       expires_at: addMinutes(new Date(), 15),
