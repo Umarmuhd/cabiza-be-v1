@@ -140,8 +140,7 @@ export async function scheduleUpdateProductHandler(
 
   try {
     cron.schedule(
-      `${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${
-        dateInMonth + 1
+      `${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth + 1
       } ${dateInDay}`,
       async () => {
         if (!product) {
@@ -374,7 +373,6 @@ export async function getAllUserPublishedProduct(req: Request, res: Response) {
 
   try {
     const user = await findUserByUsername(username);
-
     if (!user) {
       res.status(400).json({ success: false, message: "user not found" });
       return;

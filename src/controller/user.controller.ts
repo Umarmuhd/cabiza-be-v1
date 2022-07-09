@@ -1,17 +1,12 @@
 import { Request, Response } from "express";
-import { nanoid } from "nanoid";
-import { addMinutes, isAfter } from "date-fns";
-import { omit } from "lodash";
 import UserModel from "../model/user.model";
 import WalletModel from "../model/wallet.model";
-import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
-import { findUserById } from "../service/user.service";
 import log from "../utils/logger";
-import { signAccessToken, signRefreshToken } from "../service/auth.service";
 import Stripe from "stripe";
 import queryString from "query-string";
 import fs from "fs";
 import aws from "../utils/aws";
+import { findUserReferrals } from "../service/user.service";
 const Mailer = require("../utils/mailer");
 
 export async function updateUserAvatar(req: Request, res: Response) {
@@ -285,6 +280,23 @@ export async function addBankAccountHandler(req: Request, res: Response) {
     return res
       .status(200)
       .json({ success: true, message: "bank account saved" });
+  } catch (error: any) {
+    log.error(error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}
+
+export async function getUserReferralsHandler(req: Request, res: Response) {
+  const user_id = res.locals.user._id;
+
+  try {
+    const referrals = await findUserReferrals(user_id).populate(
+      "username wallet"
+    );
+
+    return res
+      .status(200)
+      .json({ success: true, message: "user referrals", data: { referrals } });
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });

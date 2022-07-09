@@ -11,18 +11,17 @@ import {
 import bcrypt from "bcrypt";
 import log from "../utils/logger";
 
-import { customAlphabet } from 'nanoid';
+import { customAlphabet } from "nanoid";
+import { Wallet } from "./wallet.model";
 
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz0123456789', 10);
-
+const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 
 export const privateFields = [
   "password",
   "__v",
   "activation_code",
   "password_reset_code",
-  "verified",
-];
+]
 
 @pre<User>("save", async function (next) {
   if (!this.isModified("password")) {
@@ -84,17 +83,21 @@ export class User {
 
   @prop({})
   birthday: string;
-  
+
   @prop({ required: true, unique: true, default: () => `referral_${nanoid()}` })
   referral_code: string;
 
   @prop({})
   bvn: string;
-  @prop({})
-  refree: string;
+
+  @prop({ ref: () => User })
+  refree: Ref<User>;
 
   @prop({ required: true })
   password: string;
+
+  @prop({ ref: () => Wallet, required: false })
+  wallet: Ref<Wallet>;
 
   @prop()
   activation_code: {
@@ -134,6 +137,21 @@ export class User {
     account_name: string;
     account_number: string;
     bank_name: string;
+  };
+
+  @prop({ default: false })
+  is_business: boolean;
+
+  @prop()
+  business_details: {
+    business_name: string;
+    business_address: {
+      address: string;
+      city: string;
+      postal_code: string;
+    };
+    business_type: string;
+    business_phone: string;
   };
 
   async validatePassword(this: DocumentType<User>, candidatePassword: string) {

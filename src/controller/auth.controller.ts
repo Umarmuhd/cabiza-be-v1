@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { get, omit } from "lodash";
+import { omit } from "lodash";
 import { addMinutes, isAfter } from "date-fns";
 import UserModel from "../model/user.model";
 import { CreateSessionInput } from "../schema/auth.schema";
@@ -12,6 +12,7 @@ import {
   createUser,
   findUserByEmail,
   findUserById,
+  findUserByReferralId,
 } from "../service/user.service";
 import { verifyJwt } from "../utils/jwt";
 import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
@@ -20,14 +21,23 @@ import WalletModel from "../model/wallet.model";
 import log from "../utils/logger";
 const Mailer = require("../utils/mailer");
 
-export async function signupUserHandler(
-  req: Request<{}, {}>,
-  res: Response
-) {
+export async function signupUserHandler(req: Request<{}, {}>, res: Response) {
   const { full_name, email, password, referral_Id } = req.body;
 
   try {
-    const user = await createUser({ ...req.body, refree: referral_Id });
+    const referee = await findUserByReferralId(referral_Id);
+    if (!referee) {
+      res.status(400).json({ success: false, message: `Invalid referral id` });
+      return;
+    }
+
+    const user = await createUser({
+      full_name,
+      email,
+      password,
+      refree: referee._id,
+    });
+
     user.activation_code = {
       token: nanoid(),
       expires_at: addMinutes(new Date(), 15),
@@ -46,7 +56,7 @@ export async function signupUserHandler(
 
     return res
       .status(200)
-      .json({ message: "User created successfully", success: true });
+      .json({ message: "User created successful", success: true });
   } catch (e: any) {
     if (e.code === 11000) {
       return res
@@ -222,14 +232,14 @@ export async function forgetPasswordHandler(req: Request, res: Response) {
 
     await Mailer.send("forgot-password", user, {
       resetLink: `https://app.cabiza.net/auth/reset-password?token=${token}&email=${email}`,
-      subject: "forget your password",
+      subject: "Reset Password",
     });
 
     await user.save();
 
     res.status(200).json({
       success: true,
-      message: `Password reset code has been sent to ${email}`,
+      message: `Password reset link has been sent to ${email}`,
     });
   } catch (error: any) {
     log.error(error);
@@ -295,7 +305,7 @@ export async function updatePasswordHandler(req: Request, res: Response) {
   if (current_password === new_password) {
     return res.status(400).json({
       success: false,
-      message: "current password should not be the same as new password",
+      message: "Current password should not be the same as new password",
     });
   }
 
@@ -304,10 +314,10 @@ export async function updatePasswordHandler(req: Request, res: Response) {
   if (!isPasswordMatched) {
     return res
       .status(400)
-      .json({ success: false, message: "current password is incorrect" });
+      .json({ success: false, message: "Current password is incorrect" });
   }
 
   user.password = new_password;
   await user.save();
-  res.status(200).json({ success: true, message: "password updated success!" });
+  res.status(200).json({ success: true, message: "Password updated success!" });
 }

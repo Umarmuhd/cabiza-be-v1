@@ -11,6 +11,7 @@ import {
   findUserByUsername,
   getCurrentUserHandler,
   getUserBalanceHandler,
+  getUserReferralsHandler,
   onBoardingHandler,
   updateUserAvatar,
   updateUserProfileHandler,
@@ -60,5 +61,7 @@ router.post("/profile", requireUser, updateUserProfileHandler);
 // );
 
 router.get("/me", requireUser, getCurrentUserHandler);
+
+router.get("/referrals", requireUser, getUserReferralsHandler);
 
 export default router;

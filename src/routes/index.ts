@@ -4,6 +4,7 @@ import auth from "./auth.routes";
 import post from "./post.routes";
 import product from "./product.routes";
 import order from "./orders.routes";
+import comment from "./comment.routes";
 
 const router = express.Router();
 
@@ -16,5 +17,7 @@ router.use("/api/v1/posts", post);
 router.use("/api/v1/products", product);
 
 router.use("/api/v1/orders", order);
+
+router.use("/api/v1/comments", comment);
 
 export default router;
