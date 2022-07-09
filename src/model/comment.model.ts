@@ -13,7 +13,7 @@ export class Comment {
   @prop({ ref: () => User })
   user: Ref<User>;
 
-  @prop({ ref: () => Post })
+  @prop({ ref: () => Post, required: true })
   post: Ref<Post>;
 
   @prop({ required: true })
@@ -22,7 +22,7 @@ export class Comment {
   @prop({ ref: () => User })
   likes?: Ref<User>[];
 
-  @prop({ default: false })
+  @prop({ default: true })
   published: boolean;
 }
 
