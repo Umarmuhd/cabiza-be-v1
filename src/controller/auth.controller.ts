@@ -31,7 +31,7 @@ export async function signupUserHandler(req: Request<{}, {}>, res: Response) {
       full_name,
       email,
       password,
-      refree: referee._id,
+      refree: referee?._id,
     });
 
     user.activation_code = {
