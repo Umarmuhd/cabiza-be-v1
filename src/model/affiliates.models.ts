@@ -14,9 +14,6 @@ export class Affiliate {
   user: Ref<User>;
 
   @prop({ required: true, default: 0 })
-  percentage: number;
-
-  @prop({ required: true, default: 0 })
   sales: number;
 
   @prop({ ref: () => Product })
