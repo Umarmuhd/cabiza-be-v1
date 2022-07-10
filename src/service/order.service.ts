@@ -71,3 +71,9 @@ export async function getOrderPaymentStatus(trxn_id: string) {
     return { error: error.response.data, data: null };
   }
 }
+
+export async function findOrderByOrderId(
+  order_id: Order["order_id"]
+): Promise<Order | null> {
+  return await OrderModel.findOne({ order_id }).populate("product");
+}

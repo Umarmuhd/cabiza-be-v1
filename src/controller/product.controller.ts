@@ -260,6 +260,13 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
       return;
     }
 
+    if (product.user?.toString() === user_id) {
+      res
+        .status(400)
+        .json({ success: false, message: "Product already yours" });
+      return;
+    }
+
     const existing_aff = await AffiliateModel.findOne({
       product: product._id,
       user: user_id,
@@ -336,6 +343,9 @@ export async function getUserProductsHandler(req: Request, res: Response) {
           },
           name: {
             $first: "$products.name",
+          },
+          revenue: {
+            $first: "$revenue",
           },
         },
       },
@@ -435,12 +445,13 @@ export async function getSingleProductHandle(req: Request, res: Response) {
   try {
     const product = await ProductModel.findOne({ product_id })
       .populate("user", "full_name profile_picture category username")
+      .select("-file")
       .exec();
 
     if (!product) {
       return res
         .status(400)
-        .json({ success: false, message: "product not found" });
+        .json({ success: false, message: "Product not found" });
     }
 
     return res

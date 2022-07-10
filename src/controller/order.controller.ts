@@ -2,7 +2,11 @@ import { Request, Response } from "express";
 import OrderModel from "../model/orders.model";
 import ProductModel from "../model/product.model";
 import AffiliateModel from "../model/affiliates.models";
-import { createOrder, getOrderPaymentStatus } from "../service/order.service";
+import {
+  createOrder,
+  findOrderByOrderId,
+  getOrderPaymentStatus,
+} from "../service/order.service";
 import {
   creditAffiliateEarnings,
   creditEarningsBalance,
@@ -137,6 +141,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
           .json({ success: false, message: "an error occurred" });
       }
 
+      order.revenue = amount * 0.4;
+
       const creditAffiliate = await creditAffiliateEarnings({
         //@ts-ignore
         user: affiliateUser.user,
@@ -158,6 +164,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
           .status(500)
           .json({ success: false, message: "an error occurred" });
       }
+
+      order.revenue = amount * 0.5;
     }
 
     await Mailer.send("order-confirm", order.user, {
@@ -169,11 +177,29 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
 
     await order.save();
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Payment successfully made" });
+    return res.status(200).json({
+      success: true,
+      message: "Payment successfully made",
+      data: order,
+    });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
   }
+}
+
+export async function getSingleOrderHandler(req: Request, res: Response) {
+  const orderId = req.params.order_id;
+  const order = await findOrderByOrderId(orderId);
+  if (!order) {
+    res.status(400).json({
+      success: false,
+      message: `order with id ${orderId} is not found`,
+    });
+    return;
+  }
+
+  return res
+    .status(200)
+    .json({ success: true, message: "order found", data: { order } });
 }
