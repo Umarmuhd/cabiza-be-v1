@@ -91,7 +91,12 @@ export class Product {
   @prop({ enum: CurrencyEnum, default: 1 })
   currency: CurrencyEnum;
 
-  @prop()
+  @prop({
+    default: {
+      can_affiliate: true,
+      percentage: 10,
+    },
+  })
   affiliate: {
     can_affiliate?: boolean;
     percent?: number;

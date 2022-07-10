@@ -109,16 +109,8 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
     });
 
     if (!order) {
-      res.status(400).json({ success: false, message: "can't create order" });
+      res.status(400).json({ success: false, message: "Can't create order" });
       return;
-    }
-
-    const credit = await creditEarningsBalance({ amount, user: product.user });
-
-    if (!credit.success) {
-      return res
-        .status(500)
-        .json({ success: false, message: "an error occurred" });
     }
 
     if (affiliate && product.affiliate.can_affiliate) {
@@ -134,16 +126,38 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
 
       order.referrer = affiliateUser.user;
 
+      const credit = await creditEarningsBalance({
+        amount: amount * 0.4,
+        user: product.user,
+      });
+
+      if (!credit.success) {
+        return res
+          .status(500)
+          .json({ success: false, message: "an error occurred" });
+      }
+
       const creditAffiliate = await creditAffiliateEarnings({
         //@ts-ignore
         user: affiliateUser.user,
         //@ts-ignore
-        amount: (product?.affiliate?.percent ?? 30 / 100) * amount,
+        amount: (product?.affiliate?.percent / 100) * amount,
       });
 
       affiliateUser.sales += 1;
 
       await affiliateUser.save();
+    } else {
+      const credit = await creditEarningsBalance({
+        amount: amount * 0.5,
+        user: product.user,
+      });
+
+      if (!credit.success) {
+        return res
+          .status(500)
+          .json({ success: false, message: "an error occurred" });
+      }
     }
 
     await Mailer.send("order-confirm", order.user, {

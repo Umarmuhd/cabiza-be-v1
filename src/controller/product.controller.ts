@@ -140,7 +140,8 @@ export async function scheduleUpdateProductHandler(
 
   try {
     cron.schedule(
-      `${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${dateInMonth + 1
+      `${dateInSeconds} ${dateInMinutes} ${dateInHours} ${dateInDate} ${
+        dateInMonth + 1
       } ${dateInDay}`,
       async () => {
         if (!product) {
@@ -271,17 +272,22 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
       return;
     }
 
-    const affiliate = await AffiliateModel.create({
-      user: user_id,
-      product: product._id,
-      percentage: 0,
-    });
+    if (product.affiliate.can_affiliate) {
+      const affiliate = await AffiliateModel.create({
+        user: user_id,
+        product: product._id,
+      });
 
-    res.status(200).json({
-      success: true,
-      message: "affiliate success!",
-      data: { affiliate },
-    });
+      res.status(200).json({
+        success: true,
+        message: "affiliate success!",
+        data: { affiliate },
+      });
+    }
+
+    return res
+      .status(400)
+      .json({ success: false, message: "Can't affiliate this product" });
   } catch (error: any) {
     log.error(error);
     return res.status(500).json({ success: false, message: error.message });
