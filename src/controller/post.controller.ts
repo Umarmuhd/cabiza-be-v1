@@ -1,10 +1,10 @@
+import fs from "fs";
 import { Request, Response } from "express";
 import PostModel from "../model/post.model";
 import CommentModel from "../model/comment.model";
-import { createPost } from "../service/post.service";
+import { createPost, findPostById } from "../service/post.service";
 import log from "../utils/logger";
 import aws from "../utils/aws";
-import fs from "fs";
 import { findUserByUsername } from "../service/user.service";
 
 export async function createNewPostHandler(req: Request, res: Response) {
@@ -118,51 +118,14 @@ export async function updatePostHandler(req: Request, res: Response) {
   }
 }
 
-export async function createCommentHandler(req: Request, res: Response) {
-  const user_id = res.locals.user._id;
-
-  const post_id = req.params.post_id;
-
-  try {
-    const { body } = req.body;
-
-    const post = await PostModel.findOne({ _id: post_id });
-    if (!post) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Post not found" });
-    }
-
-    const comment = await CommentModel.create({
-      user: user_id,
-      post: post_id,
-      body,
-      published: true,
-    });
-
-    if (!comment) {
-      res.status(400).json({ success: false, message: "comment not found" });
-      return;
-    }
-
-    return res
-      .status(201)
-      .json({ success: true, message: "comment created", data: { comment } });
-  } catch (error: any) {
-    log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
-  }
-}
-
 export async function getPostCommentsHandler(req: Request, res: Response) {
   const post_id = req.params.post_id;
 
   try {
-    const post = await PostModel.findOne({ _id: post_id });
+    const post = await findPostById(post_id);
     if (!post) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Post not found" });
+      res.status(400).json({ success: false, message: "Post not found" });
+      return;
     }
 
     const comments = await CommentModel.find({ post: post._id })
@@ -171,10 +134,10 @@ export async function getPostCommentsHandler(req: Request, res: Response) {
 
     return res
       .status(200)
-      .json({ success: true, message: "comment fetched", data: { comments } });
+      .json({ success: true, message: "Comment fetched", data: { comments } });
   } catch (error: any) {
     log.error(error);
-    return res.status(409).json({ success: false, message: error.message });
+    return res.status(500).json({ success: false, message: error.message });
   }
 }
 
@@ -261,8 +224,7 @@ export async function publishingHandler(req: Request, res: Response) {
   const post_id = req.params.post_id;
 
   try {
-    const post = await PostModel.findById(post_id);
-
+    const post = await findPostById(post_id);
     if (!post) {
       return res
         .status(400)
@@ -281,7 +243,7 @@ export async function publishingHandler(req: Request, res: Response) {
 
     return res.status(200).json({
       success: true,
-      message: `post ${post.published ? "published" : "unpublished"}`,
+      message: `Post ${post.published ? "published" : "unpublished"}`,
       data: { post },
     });
   } catch (error: any) {
@@ -295,7 +257,6 @@ export async function getAllUserPublishedPosts(req: Request, res: Response) {
 
   try {
     const user = await findUserByUsername(username);
-
     if (!user) {
       res.status(400).json({ success: false, message: "user not found" });
       return;

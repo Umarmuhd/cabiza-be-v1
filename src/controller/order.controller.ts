@@ -128,7 +128,7 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
       if (!affiliateUser) {
         res
           .status(400)
-          .json({ success: false, message: "affiliate User not found" });
+          .json({ success: false, message: "Affiliate User not found" });
         return;
       }
 
@@ -138,7 +138,7 @@ export async function createPaidOrderHandler(req: Request, res: Response) {
         //@ts-ignore
         user: affiliateUser.user,
         //@ts-ignore
-        amount: (product?.affiliate?.percent / 100) * amount,
+        amount: (product?.affiliate?.percent ?? 30 / 100) * amount,
       });
 
       affiliateUser.sales += 1;

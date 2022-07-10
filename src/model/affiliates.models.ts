@@ -10,7 +10,7 @@ export class Affiliate {
   @prop({ required: true, unique: true, default: () => `cabiza_${nanoid()}` })
   affiliate_id: string;
 
-  @prop({ ref: () => User })
+  @prop({ ref: () => User, required: true })
   user: Ref<User>;
 
   @prop({ required: true, default: 0 })
