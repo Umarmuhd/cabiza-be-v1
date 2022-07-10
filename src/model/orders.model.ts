@@ -47,6 +47,9 @@ export class Order {
 
   @prop({ ref: () => User })
   product_owner: Ref<User>;
+
+  @prop({})
+  revenue: number;
 }
 
 const OrderModel = getModelForClass(Order, {
