@@ -26,10 +26,6 @@ export async function signupUserHandler(req: Request<{}, {}>, res: Response) {
 
   try {
     const referee = await findUserByReferralId(referral_Id);
-    if (!referee) {
-      res.status(400).json({ success: false, message: `Invalid referral id` });
-      return;
-    }
 
     const user = await createUser({
       full_name,
