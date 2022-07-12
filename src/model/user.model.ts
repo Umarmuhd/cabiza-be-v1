@@ -13,6 +13,7 @@ import log from "../utils/logger";
 
 import { customAlphabet } from "nanoid";
 import { Wallet } from "./wallet.model";
+import { Referral } from "../modules/referrals/referral.model";
 
 const nanoid = customAlphabet("abcdefghijklmnopqrstuvwxyz0123456789", 10);
 
@@ -21,7 +22,7 @@ export const privateFields = [
   "__v",
   "activation_code",
   "password_reset_code",
-]
+];
 
 @pre<User>("save", async function (next) {
   if (!this.isModified("password")) {
@@ -84,20 +85,14 @@ export class User {
   @prop({})
   birthday: string;
 
-  @prop({ required: true, unique: true, default: () => `referral_${nanoid()}` })
-  referral_code: string;
-
   @prop({})
   bvn: string;
 
-  @prop({ ref: () => User })
-  refree: Ref<User>;
+  @prop({ ref: () => Referral })
+  referral: Ref<Referral>;
 
   @prop({ required: true })
   password: string;
-
-  @prop({ ref: () => Wallet, required: false })
-  wallet: Ref<Wallet>;
 
   @prop()
   activation_code: {

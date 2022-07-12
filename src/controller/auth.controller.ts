@@ -12,32 +12,36 @@ import {
   createUser,
   findUserByEmail,
   findUserById,
-  findUserByReferralId,
 } from "../service/user.service";
 import { verifyJwt } from "../utils/jwt";
-import { CreateUserInput, VerifyUserInput } from "../schema/user.schema";
+import { VerifyUserInput } from "../schema/user.schema";
 import { nanoid } from "nanoid";
 import WalletModel from "../model/wallet.model";
 import log from "../utils/logger";
+import {
+  createReferral,
+  findByReferralId,
+} from "../modules/referrals/referral.service";
 const Mailer = require("../utils/mailer");
 
 export async function signupUserHandler(req: Request<{}, {}>, res: Response) {
-  const { full_name, email, password, referral_Id } = req.body;
+  const { full_name, email, password, referral_id } = req.body;
 
   try {
-    const referee = await findUserByReferralId(referral_Id);
+    const referee = await findByReferralId(referral_id);
 
-    const user = await createUser({
-      full_name,
-      email,
-      password,
-      refree: referee?._id,
+    const user = await createUser({ full_name, email, password });
+
+    const referral = await createReferral({
+      user: user._id,
+      referred_by: referee?.user,
     });
 
     user.activation_code = {
       token: nanoid(),
       expires_at: addMinutes(new Date(), 15),
     };
+    user.referral = referral._id;
 
     await WalletModel.create({ user: user._id });
 
@@ -47,7 +51,7 @@ export async function signupUserHandler(req: Request<{}, {}>, res: Response) {
 
     await Mailer.send("confirm-account", user, {
       activationLink,
-      subject: "Welcome to Cabiza",
+      subject: "Verify your Email",
     });
 
     return res
@@ -93,8 +97,7 @@ export async function accountActivation(
 
   if (user.activation_code.token === activation_code) {
     user.verified = true;
-    user.activation_code.token = null;
-    user.activation_code.expires_at = null;
+    user.activation_code = { token: null, expires_at: null };
 
     await user.save();
 
@@ -122,7 +125,7 @@ export async function loginUserHandler(
   const message = "Invalid email or password";
   const { email, password } = req.body;
 
-  const user = await findUserByEmail(email);
+  const user = await findUserByEmail(email).populate("referral");
 
   if (!user) {
     return res.status(400).json({ message, success: false });
