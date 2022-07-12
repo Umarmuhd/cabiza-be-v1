@@ -9,7 +9,7 @@ export class Wallet {
   @prop({ required: true, unique: true, default: () => `wallet_${nanoid()}` })
   wallet_id: string;
 
-  @prop({ ref: "User" })
+  @prop({ ref: () => User, required: true })
   user: Ref<User>;
 
   @prop({ required: true, default: 0 })
