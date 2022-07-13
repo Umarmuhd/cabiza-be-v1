@@ -149,14 +149,13 @@ export async function findUserByUsername(req: Request, res: Response) {
     const user = await UserModel.findOne({ username });
 
     if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "user not found" });
+      res.status(400).json({ success: false, message: "User not found" });
+      return;
     }
 
     return res
       .status(200)
-      .json({ success: true, message: "user found", data: { user } });
+      .json({ success: true, message: "User found", data: { user } });
   } catch (error: any) {
     log.error(error);
     return res.status(409).json({ success: false, message: error.message });
