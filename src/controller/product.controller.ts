@@ -285,9 +285,9 @@ export async function becomeAffiliateHandler(req: Request, res: Response) {
         product: product._id,
       });
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        message: "affiliate success!",
+        message: "Affiliate success!",
         data: { affiliate },
       });
     }
