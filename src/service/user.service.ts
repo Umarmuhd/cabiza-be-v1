@@ -16,7 +16,7 @@ export function findUserByUsername(username: string) {
   return UserModel.findOne({ username });
 }
 
-export function findUserByReferralId(referralId: Pick<User, "referral_code">) {
+export function findUserByReferralId(referralId: string) {
   return UserModel.findOne({ referral_code: referralId });
 }
 
